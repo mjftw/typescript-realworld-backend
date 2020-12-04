@@ -5,7 +5,8 @@
   "main": "src/index.ts",
   "scripts": {
     "build": "tsc",
-    "test": "npm test"
+    "test": "npm test",
+    "test:api": "APIURL=http://localhost:3000/api ./scripts/run-api-tests.sh"
   },
   "repository": {
     "type": "git",
