@@ -1,0 +1,27 @@
+{
+  "name": "realworld-typescript-backend",
+  "version": "0.1.0",
+  "description": "A back-end based on the RealWorld API spec using Typescript, PostgreSQL, Node, Express, and Docker.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mjftw/realworld-typescript-backend.git"
+  },
+  "keywords": [
+    "realworld-backend",
+    "typescrpt",
+    "nodejs",
+    "postgresql",
+    "expressjs",
+    "docker"
+  ],
+  "author": "Merlin Webster",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/mjftw/realworld-typescript-backend/issues"
+  },
+  "homepage": "https://github.com/mjftw/realworld-typescript-backend#readme"
+}
