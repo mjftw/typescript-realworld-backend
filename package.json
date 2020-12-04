@@ -23,5 +23,12 @@
   "bugs": {
     "url": "https://github.com/mjftw/realworld-typescript-backend/issues"
   },
-  "homepage": "https://github.com/mjftw/realworld-typescript-backend#readme"
+  "homepage": "https://github.com/mjftw/realworld-typescript-backend#readme",
+  "devDependencies": {
+    "eslint": "^7.14.0",
+    "typescript": "^4.1.2",
+    "@types/node": "^14.14.10"
+  },
+  "dependencies": {
+  }
 }
