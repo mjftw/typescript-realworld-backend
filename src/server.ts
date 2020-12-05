@@ -11,7 +11,7 @@ class Server {
         this.dbConnect();
     }
 
-    public start(port: number) {
+    public start(port: number): void {
         this.app.listen(port, () => {
             console.log(`Express server running at http://localhost:${port}`);
         });
