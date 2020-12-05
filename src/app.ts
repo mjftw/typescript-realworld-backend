@@ -1,6 +1,7 @@
 import Server from "./server";
 
-const port = parseInt(process.env.SERVER_PORT || "4000");
+// Change port mapping in docker to present on different port
+const port = 4000;
 
 const server = new Server();
 

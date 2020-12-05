@@ -1,0 +1,11 @@
+version: "3"
+services:
+  realworld-backend-app:
+    container_name: realworld-backend-app
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      NODE_ENV: development
+    ports:
+      - ${SERVER_PORT}:4000

@@ -24,4 +24,9 @@ This implementation uses Typescript, Node, Express, PostgreSQL, and Docker.
 
 ## Getting started
 
-> npm install, npm start, etc
+The app is packaged in a Docker container can be run with:
+
+```shell
+# Select port required and bring up app service
+SERVER_PORT=4000 docker-compose up
+```

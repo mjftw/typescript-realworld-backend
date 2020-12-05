@@ -1,5 +1,5 @@
 {
-  "name": "realworld-typescript-backend",
+  "name": "typescript-realworld-backend",
   "version": "0.1.0",
   "description": "A back-end based on the RealWorld API spec using Typescript, PostgreSQL, Node, Express, and Docker.",
   "main": "src/index.ts",
