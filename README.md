@@ -58,11 +58,11 @@ Once these are set you can run the app, database, and database admin page with:
 docker-compose up
 ```
 
-For those running Linux, a convenience script [run-services.sh](run-services.sh) is provided to simplify this and save some typing.
+For those running Linux, a convenience script [run-services.sh](scripts/run-services.sh) is provided to simplify this and save some typing.
 You can edit the environment variables at the top of the script, and bring everything up with:
 
 ```shell
-./run-services.sh
+./scripts/run-services.sh
 ```
 
 ### Install dependencies
