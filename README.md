@@ -28,16 +28,17 @@ The app is packaged with Docker and can be run with docker compose.
 
 A number of configuration environment variables are used to configure the app.
 
-| Variable name | Description | Example |
-|---------------|-------------|---------|
-| APP_PORT |  Port to expose the app on | 4000 |
-| APP_HOST |  Hostname to use for the app | localhost |
-| POSTGRES_USER |  Username to be used for postgreSQL database | postgres |
-| POSTGRES_PASSWORD |  Password to be used for postgreSQL database | postgres |
-| POSRGRES_PORT |  Port to expose the database on | 5432 |
-| PGADMIN_EMAIL |  Pgadmin4 database admin login email | myemail@domain.com |
-| PGADMIN_PASSWORD |  Pgadmin4 database admin login password | supersecret |
-| PGADMIN_PORT |  Port to expose the Pgadmin4 on | 443 |
+| Variable name     | Description                                 | Example            |
+| ----------------- | ------------------------------------------- | ------------------ |
+| APP_PORT          | Port to expose the app on                   | 4000               |
+| APP_HOST          | Hostname to use for the app                 | localhost          |
+| POSTGRES_USER     | Username to be used for postgreSQL database | postgres           |
+| POSTGRES_PASSWORD | Password to be used for postgreSQL database | postgres           |
+| POSTGRES_DB_NAME  | Name to be used for postgreSQL database     | postgres           |
+| POSTGRES_PORT     | Port to expose the database on              | 5432               |
+| PGADMIN_EMAIL     | Pgadmin4 database admin login email         | myemail@domain.com |
+| PGADMIN_PASSWORD  | Pgadmin4 database admin login password      | supersecret        |
+| PGADMIN_PORT      | Port to expose the Pgadmin4 on              | 443                |
 
 ## Getting started
 

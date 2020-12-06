@@ -1,5 +1,5 @@
-import express from "express";
-import test_router from "./routers/test_router";
+import express from 'express';
+import test_router from './routers/test_router';
 
 class Server {
     private app;
@@ -20,8 +20,8 @@ class Server {
     private serverConfig() {}
 
     private routerConfig() {
-        this.app.use("/", (_req, res) => res.send("It lives!"));
-        this.app.use("/api", test_router);
+        this.app.use('/db', test_router);
+        this.app.use('/', (_req, res) => res.send('It lives!'));
     }
 
     private dbConnect() {}

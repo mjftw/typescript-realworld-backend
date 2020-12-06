@@ -1,49 +1,52 @@
-version: "3"
+version: '3'
 
 services:
-  realworld-backend-app:
-    container_name: realworld-backend-app
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-    environment:
-      NODE_ENV: development
-      PORT: ${APP_PORT}
-      DB_PORT: ${POSRGRES_PORT}
-      DB_HOST: localhost
-    ports:
-      - ${APP_PORT}:${APP_PORT}
-    depends_on:
-      - postgres
+    realworld-backend-app:
+        container_name: realworld-backend-app
+        build:
+            context: .
+            dockerfile: ./Dockerfile
+        restart: always
+        environment:
+            NODE_ENV: development
+            PORT: ${APP_PORT}
+            DB_CONNECTION_STRING: 'postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT}/${POSTGRES_DB_NAME}'
+        ports:
+            - ${APP_PORT}:${APP_PORT}
+        depends_on:
+            - postgres
 
-  postgres:
-    image: postgres:13.1
-    container_name: postgres
-    restart: always
-    environment:
-      POSTGRES_USER: "${POSTGRES_USER}"
-      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
-    volumes:
-      - db-data:/var/lib/postgresql/data
-      - ./src/migrations/dbinit.sql:/docker-entrypoint-initdb.d/dbinit.sql
-    ports:
-      - ${POSRGRES_PORT}:5432
+    postgres:
+        image: postgres:13.1
+        container_name: postgres
+        restart: always
+        environment:
+            POSTGRES_USER: '${POSTGRES_USER}'
+            POSTGRES_DB: ${POSTGRES_DB_NAME}
+            POSTGRES_PASSWORD: '${POSTGRES_PASSWORD}'
+        volumes:
+            - db-data:/var/lib/postgresql/data
+            - ./src/migrations/dbinit.sql:/docker-entrypoint-initdb.d/dbinit.sql
+        ports:
+            - ${POSTGRES_PORT}:5432
 
-  pgadmin:
-    image: dpage/pgadmin4:4.28
-    container_name: pgadmin
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: "${PGADMIN_EMAIL}"
-      PGADMIN_DEFAULT_PASSWORD: "${PGADMIN_PASSWORD}"
-      PGADMIN_LISTEN_PORT: 80
-    ports:
-      - ${PGADMIN_PORT}:80
-    volumes:
-      - pgadmin-data:/var/lib/pgadmin
-    depends_on:
-      - postgres
+    pgadmin:
+        image: dpage/pgadmin4:4.28
+        container_name: pgadmin
+        restart: always
+        environment:
+            PGADMIN_DEFAULT_EMAIL: '${PGADMIN_EMAIL}'
+            PGADMIN_DEFAULT_PASSWORD: '${PGADMIN_PASSWORD}'
+            PGADMIN_LISTEN_PORT: 80
+        ports:
+            - ${PGADMIN_PORT}:80
+        volumes:
+            - pgadmin-data:/var/lib/pgadmin
+        depends_on:
+            - postgres
+        links:
+            - postgres:db-server
 
 volumes:
-  db-data:
-  pgadmin-data:
+    db-data:
+    pgadmin-data:
