@@ -1,10 +1,10 @@
 import { Router } from 'express';
-import pool, { dbConnectionString } from '../dbconfig';
+import pool from '../dbconfig';
 
 const router = Router();
 
 router.get('/', async (_req, res) => {
-    console.log(`Connecting to ${dbConnectionString}`);
+    console.log(`Connecting to pool: ${pool}`);
     const client = await pool.connect();
     const query = await client.query('SELECT CURRENT_DATE');
     client.release();

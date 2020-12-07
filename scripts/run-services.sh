@@ -1,12 +1,12 @@
 # Express app configuration
-export APP_PORT="4000"
+export APP_PORT="3000"
 export HOSTNAME="localhost"
 
 # PostgreSQL database configuration
-export POSTGRES_USER="postgres"
-export POSTGRES_PASSWORD="postgres"
-export POSTGRES_PORT="5432"
-export POSTGRES_DB_NAME="realworld-backend-app"
+export DB_USER="admin"
+export DB_PASSWORD="secret"
+export DB_PORT="35432"
+export DB_NAME="realworld-backend-app"
 
 # Pgadmin4 db admin configuration
 export PGADMIN_EMAIL="myemail@domain.com"
