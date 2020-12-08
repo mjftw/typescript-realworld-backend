@@ -31,7 +31,7 @@ services:
             POSTGRES_PASSWORD: '${DB_PASSWORD}'
         volumes:
             - db-data:/var/lib/postgresql/data
-            - ./src/migrations/dbinit.sql:/docker-entrypoint-initdb.d/dbinit.sql
+            - ./src/db/migrations/dbinit.sql:/docker-entrypoint-initdb.d/dbinit.sql
         ports:
             - ${DB_PORT}:5432
 

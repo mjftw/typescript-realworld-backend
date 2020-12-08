@@ -1,8 +1,8 @@
 CREATE TABLE users (
     user_id bigint GENERATED ALWAYS AS IDENTITY,
     email varchar(200) NOT NULL,
-    username varchar(50) NOT NULL,
-    bio text,
+    username varchar(50) NOT NULL UNIQUE,
+    bio text NOT NULL,
     image text,
     PRIMARY KEY(user_id)
 );
@@ -36,7 +36,7 @@ CREATE TABLE comments (
 
 CREATE TABLE tags (
     tag_id int GENERATED ALWAYS AS IDENTITY,
-    name varchar(50) NOT NULL,
+    title varchar(50) NOT NULL UNIQUE,
     PRIMARY KEY(tag_id)
 );
 
