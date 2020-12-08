@@ -21,6 +21,13 @@ export interface UserProfile extends UserBase {
     following: boolean;
 }
 
+export interface User extends UserBase {
+    id: number;
+    email: string;
+    password_hash: string;
+    password_salt: string;
+}
+
 interface UserBase {
     username: string;
     bio: string;

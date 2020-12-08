@@ -1,11 +1,16 @@
 CREATE TABLE users (
     user_id bigint GENERATED ALWAYS AS IDENTITY,
-    email varchar(200) NOT NULL,
+    password_hash varchar(100) NOT NULL,
+    password_salt varchar(50) NOT NULL,
+    email varchar(200) NOT NULL UNIQUE,
     username varchar(50) NOT NULL UNIQUE,
     bio text NOT NULL,
     image text,
     PRIMARY KEY(user_id)
 );
+
+CREATE UNIQUE INDEX email_idx ON users (email);
+CREATE UNIQUE INDEX id_idx ON users (user_id);
 
 CREATE TABLE articles (
     article_id bigint GENERATED ALWAYS AS IDENTITY,

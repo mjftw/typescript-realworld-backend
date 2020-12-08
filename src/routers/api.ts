@@ -3,6 +3,7 @@ import { Validator } from 'express-json-validator-middleware';
 import { loginUser } from '../resources/users/db';
 import { UserLoginSchema } from '../resources/users/schemas';
 import { UserAuth, UserLogin } from '../resources/users/types';
+import { types } from 'util';
 
 const router = Router();
 const validator = new Validator({ allErrors: true });
@@ -12,12 +13,21 @@ router.post(
     validator.validate({
         body: UserLoginSchema,
     }),
-    (req: Request, res: Response) => {
+    async (req: Request, res: Response) => {
         // Valid user
-        const userLogin: UserLogin = req.body;
-        const userAuth: UserAuth = loginUser(userLogin);
+        const userLogin: UserLogin = req.body.user;
+        console.log(userLogin);
 
-        res.send(userAuth);
+        const maybeUser: UserAuth | Error = await loginUser(userLogin);
+        if (types.isNativeError(maybeUser)) {
+            //NOTE: This could be invalid auth or nonexistent user
+            res.status(401).send(maybeUser.message);
+            return;
+        }
+        1;
+        const user = maybeUser;
+
+        res.send(user);
 
         //TODO:
         // DONE: 1. Validate request body
