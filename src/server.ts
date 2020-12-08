@@ -1,5 +1,6 @@
-import express from 'express';
-import test_router from './routers/test_router';
+import express, { json } from 'express';
+import api_router from './routers/api';
+import schemaValidationError from './routers/errors';
 
 class Server {
     private app;
@@ -17,11 +18,14 @@ class Server {
         });
     }
 
-    private serverConfig() {}
+    private serverConfig() {
+        this.app.use(json());
+    }
 
     private routerConfig() {
-        this.app.use('/db', test_router);
+        this.app.use('/api', api_router);
         this.app.use('/', (_req, res) => res.send('It lives!'));
+        this.app.use(schemaValidationError);
     }
 
     private dbConnect() {}
