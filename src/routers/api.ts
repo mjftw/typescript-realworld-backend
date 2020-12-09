@@ -4,6 +4,7 @@ import { loginUser, newAuthJwt } from '../common/auth';
 import { UserLoginSchema } from '../json_schemas/user';
 import { User, UserAuth, UserLogin } from '../common/types';
 import { types } from 'util';
+import { jwtSecret } from '../config';
 
 const router = Router();
 const validator = new Validator({ allErrors: true });
@@ -27,14 +28,14 @@ router.post(
         1;
         const user = maybeUser;
 
-        const token = newAuthJwt(user.id);
+        const token = newAuthJwt(user.id, jwtSecret);
 
         const mockUser: UserAuth = {
             email: user.email,
             username: user.username,
             bio: user.bio,
             image: user.image,
-            token: 'Not a real token',
+            token: token,
         };
 
         res.send(mockUser);
