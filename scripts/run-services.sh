@@ -1,5 +1,5 @@
 # Express app configuration
-export APP_PORT="3000"
+export APP_PORT="4000"
 export HOSTNAME="localhost"
 
 # PostgreSQL database configuration

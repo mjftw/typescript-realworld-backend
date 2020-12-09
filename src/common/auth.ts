@@ -1,5 +1,5 @@
-import pool from '../../dbconfig';
-import { User, UserAuth, UserLogin } from './types';
+import { UserAuth, UserLogin } from './types';
+import { getUserByEmail } from '../db/queries';
 
 export async function loginUser(
     userLogin: UserLogin
@@ -31,30 +31,4 @@ export async function loginUser(
     };
 
     return mockUser;
-}
-
-export async function getUserByEmail(email: string): Promise<User | null> {
-    const client = await pool.connect();
-    const result = await client.query(`
-        SELECT
-            user_id,
-            email,
-            password_hash,
-            password_salt,
-            username,
-            bio,
-            image
-        FROM users
-        WHERE email = '${email}'
-        LIMIT 1;
-    `);
-    client.release();
-
-    //TODO: No users in DB with matching email
-    if (result.rowCount == 0) {
-        return null;
-    }
-    const user: User = result.rows[0];
-
-    return user;
 }

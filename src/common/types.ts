@@ -1,3 +1,4 @@
+// ========== User ==========
 // Used for login requests
 export interface UserLogin {
     email: string;
@@ -32,4 +33,34 @@ interface UserBase {
     username: string;
     bio: string;
     image: string | null;
+}
+
+// ========== Article ==========
+export interface Article {
+    id: number;
+    slug: string;
+    title: string;
+    description: string;
+    body: string;
+    tagList: [Tag];
+    createdAt: Date;
+    updatedAt: Date;
+    favorited: boolean;
+    favoritesCount: number;
+    author: UserProfile;
+}
+
+// ========== Comment ==========
+export interface Comment {
+    id: number;
+    createdAt: Date;
+    updatedAt: Date;
+    body: string;
+    author: UserProfile;
+}
+
+// ========== Tag ==========
+export interface Tag {
+    id: number;
+    title: string;
 }

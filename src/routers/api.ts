@@ -1,8 +1,8 @@
 import { Request, Response, Router } from 'express';
 import { Validator } from 'express-json-validator-middleware';
-import { loginUser } from '../resources/users/db';
-import { UserLoginSchema } from '../resources/users/schemas';
-import { UserAuth, UserLogin } from '../resources/users/types';
+import { loginUser } from '../common/auth';
+import { UserLoginSchema } from '../json_schemas/user';
+import { UserAuth, UserLogin } from '../common/types';
 import { types } from 'util';
 
 const router = Router();
@@ -31,7 +31,7 @@ router.post(
 
         //TODO:
         // DONE: 1. Validate request body
-        // 2. Check if user no exists, error if so
+        // DONE: 2. Check if user no exists, error if so
         // 3. Generate hash of password
         // 4. Add new user to database (including hashed password)
         // 5. Generate JWT auth token
