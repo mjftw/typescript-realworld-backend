@@ -1,10 +1,5 @@
 import { Pool } from 'pg';
-
-const dbHost = process.env.DB_HOST || 'localhost';
-const dbPort = parseInt(process.env.DB_PORT || '5432');
-const dbName = process.env.DB_NAME;
-const dbUser = process.env.DB_USERNAME;
-const dbPass = process.env.DB_PASSWORD;
+import { dbHost, dbPort, dbName, dbUser, dbPass } from '../config';
 
 const pool = new Pool({
     host: dbHost,
