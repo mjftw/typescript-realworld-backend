@@ -2,7 +2,7 @@ import { Request, Response, Router } from 'express';
 import { Validator } from 'express-json-validator-middleware';
 import { loginUser } from '../common/auth';
 import { UserLoginSchema } from '../json_schemas/user';
-import { UserAuth, UserLogin } from '../common/types';
+import { User, UserAuth, UserLogin } from '../common/types';
 import { types } from 'util';
 
 const router = Router();
@@ -18,24 +18,30 @@ router.post(
         const userLogin: UserLogin = req.body.user;
         console.log(userLogin);
 
-        const maybeUser: UserAuth | Error = await loginUser(userLogin);
+        const maybeUser: User | Error = await loginUser(userLogin);
         if (types.isNativeError(maybeUser)) {
             //NOTE: This could be invalid auth or nonexistent user
-            res.status(401).send(maybeUser.message);
+            res.status(401).send('Incorrect email address or password');
             return;
         }
         1;
         const user = maybeUser;
 
-        res.send(user);
+        const mockUser: UserAuth = {
+            email: user.email,
+            username: user.username,
+            bio: user.bio,
+            image: user.image,
+            token: 'Not a real token',
+        };
+
+        res.send(mockUser);
 
         //TODO:
-        // DONE: 1. Validate request body
-        // DONE: 2. Check if user no exists, error if so
-        // 3. Generate hash of password
-        // 4. Add new user to database (including hashed password)
-        // 5. Generate JWT auth token
-        // 6. Send response with new user
+        // 1. Login user
+        // 2. Generate JWT auth token
+        // 3. Populate and return UserAuth
+        // 4. Send response with new user
     }
 );
 

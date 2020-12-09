@@ -1,9 +1,8 @@
-import { UserAuth, UserLogin } from './types';
+import { randomBytes } from 'crypto';
+import { User, UserLogin } from './types';
 import { getUserByEmail } from '../db/queries';
 
-export async function loginUser(
-    userLogin: UserLogin
-): Promise<UserAuth | Error> {
+export async function loginUser(userLogin: UserLogin): Promise<User | Error> {
     //TODO: 1. Check if user already logged in, error if so
 
     //DONE: 2. Check if user exists in database
@@ -19,16 +18,21 @@ export async function loginUser(
 
     //TODO: 3. Create hash of password
     //TODO: 4. Check password hash matches value from db, error if not
-    //TODO: 5. Create JWT for user login (including user ID as data)
-    //TODO: 6. Populate and return UserAuth
+    //TODO: 5. Return logged in User
 
-    const mockUser: UserAuth = {
-        email: user.email,
-        username: user.username,
-        bio: user.bio,
-        image: user.image,
-        token: 'Not a real token',
-    };
-
-    return mockUser;
+    return user;
 }
+
+//TODO: Add expiry date to tokens
+export function newAuthJwt(id: number): string {
+    //TODO: Create JWT for user login (including user ID as data)
+    return 'Foo';
+}
+
+// function hashPassword(password: string, salt: string): string {
+//     return 'Foo';
+// }
+
+// function newSalt(length: number): string {
+//     return 'Foo';
+// }
