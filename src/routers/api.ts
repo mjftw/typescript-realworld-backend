@@ -1,33 +1,40 @@
 import { Request, Response, Router } from 'express';
 import { Validator } from 'express-json-validator-middleware';
 import { loginUser, newAuthJwt } from '../common/auth';
-import { UserLoginSchema } from '../json_schemas/user';
+import { UserLoginSchema, UserRegisterSchema } from '../json_schemas/user';
 import { User, UserAuth, UserLogin } from '../common/types';
-import { types } from 'util';
 import { jwtSecret } from '../config';
 
 const router = Router();
 const validator = new Validator({ allErrors: true });
 
 router.post(
+    '/users/',
+    validator.validate({ body: UserRegisterSchema }),
+    async (_req: Request, _res: Response) => {
+        console.log('Valid');
+    }
+);
+
+router.post(
     '/users/login/',
     validator.validate({
         body: UserLoginSchema,
     }),
-    async (req: Request, res: Response) => {
+    async (req: Request, res: Response): Promise<void> => {
         // Valid user
         const userLogin: UserLogin = req.body.user;
         console.log(userLogin);
 
-        const maybeUser: User | Error = await loginUser(userLogin);
-        if (types.isNativeError(maybeUser)) {
+        const maybeUser: User | null = await loginUser(userLogin);
+        if (maybeUser === null) {
             //NOTE: This could be invalid auth or nonexistent user
-            res.status(401).send('Incorrect email address or password');
+            res.status(401).send({
+                errors: 'Incorrect email address or password',
+            });
             return;
         }
-        1;
         const user = maybeUser;
-
         const token = newAuthJwt(user.id, jwtSecret);
 
         const mockUser: UserAuth = {
