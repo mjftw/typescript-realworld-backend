@@ -42,7 +42,37 @@ A number of configuration environment variables are used to configure the app.
 
 ## Getting started
 
-The app can be run using Docker Compose. If you've not got this installed yet, check out the [Install dependencies](#Install-dependencies) section.
+The app can be run standalone with Node.js, or the whole stack can be run using Docker.
+
+### Run the stack
+
+#### Dependencies
+
+First of all, make sure you have Docker and Docker Compose installed.
+Installation instructions can be found at:
+
+* [Docker](https://docs.docker.com/get-docker/)
+* [Docker Compose](https://docs.docker.com/compose/install/)
+
+If installing for the first time, make sure to check successful installation with:
+
+```shell
+$ docker -v
+Docker version 19.03.13, build 4484c46d9d
+
+$ docker-compose -v
+docker-compose version 1.27.4, build 40524192
+```
+
+(_Your versions may vary_)
+
+#### Build and run
+
+To build the app Docker container run:
+
+```shell
+docker-compose up
+```
 
 The first step is to build the app's Docker image:
 
@@ -66,28 +96,29 @@ You can edit the environment variables at the top of the script, and bring every
 ./scripts/run-services.sh
 ```
 
-### Install dependencies
+### Run just the app
 
-First of all, make sure you have Docker and Docker Compose installed.
-Installation instructions can be found at:
+To run the app on it's own you can use Node.js.
+Ensure this is installed before continuing.
 
-* [Docker](https://docs.docker.com/get-docker/)
-* [Docker Compose](https://docs.docker.com/compose/install/)
-
-If installing for the first time, make sure to check successful installation with:
+Install dependencies:
 
 ```shell
-$ docker -v
-Docker version 19.03.13, build 4484c46d9d
-
-$ docker-compose -v
-docker-compose version 1.27.4, build 40524192
+npm install
 ```
 
-(_Your versions may vary_)
-
-To build the app Docker container run:
+Run the app:
 
 ```shell
-docker-compose up
+npm start
 ```
+> Note: You will need to manually set the [environment variables](#server-configuration) before running this.
+
+Run the tests:
+
+```shell
+npm test
+```
+
+>Note: The test suite uses a separate set of environment variables, which can
+be set in [test_env.sh](test_env.sh).
