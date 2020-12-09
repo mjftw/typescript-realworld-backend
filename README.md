@@ -28,17 +28,17 @@ The app is packaged with Docker and can be run with docker compose.
 
 A number of configuration environment variables are used to configure the app.
 
-| Variable name    | Description                                 | Example            |
-| ---------------- | ------------------------------------------- | ------------------ |
-| APP_PORT         | Port to expose the app on                   | 4000               |
-| JWT_SECRET       | Secret to use for signing JWT auth tokens   | arandomstring      |
-| DB_USERNAME      | Username to be used for postgreSQL database | postgres           |
-| DB_PASSWORD      | Password to be used for postgreSQL database | postgres           |
-| DB_NAME          | Name to be used for postgreSQL database     | postgres           |
-| DB_PORT          | Port to expose the database on              | 5432               |
-| PGADMIN_EMAIL    | Pgadmin4 database admin login email         | myemail@domain.com |
-| PGADMIN_PASSWORD | Pgadmin4 database admin login password      | supersecret        |
-| PGADMIN_PORT     | Port to expose the Pgadmin4 on              | 443                |
+| Variable name    | Description                                 | Required for app | Example            |
+| ---------------- | ------------------------------------------- | ---------------- |
+| APP_PORT         | Port to expose the app on                   | Yes              | 4000               |
+| JWT_SECRET       | Secret to use for signing JWT auth tokens   | Yes              | arandomstring      |
+| DB_USERNAME      | Username to be used for postgreSQL database | Yes              | postgres           |
+| DB_PASSWORD      | Password to be used for postgreSQL database | Yes              | postgres           |
+| DB_NAME          | Name to be used for postgreSQL database     | Yes              | postgres           |
+| DB_PORT          | Port to expose the database on              | Yes              | 5432               |
+| PGADMIN_EMAIL    | Pgadmin4 database admin login email         | No               | myemail@domain.com |
+| PGADMIN_PASSWORD | Pgadmin4 database admin login password      | No               | supersecret        |
+| PGADMIN_PORT     | Port to expose the Pgadmin4 on              | No               | 443                |
 
 ## Getting started
 
