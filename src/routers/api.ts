@@ -2,8 +2,9 @@ import { Request, Response, Router } from 'express';
 import { Validator } from 'express-json-validator-middleware';
 import { loginUser, newAuthJwt } from '../common/auth';
 import { UserLoginSchema, UserRegisterSchema } from '../json_schemas/user';
-import { User, UserAuth, UserLogin } from '../common/types';
+import { User, UserAuth, UserLogin, UserRegister } from '../common/types';
 import { jwtSecret } from '../config';
+import { getUserByEmail, getUserByUsername } from '../db/queries';
 
 const router = Router();
 const validator = new Validator({ allErrors: true });
@@ -11,8 +12,24 @@ const validator = new Validator({ allErrors: true });
 router.post(
     '/users/',
     validator.validate({ body: UserRegisterSchema }),
-    async (_req: Request, _res: Response) => {
-        console.log('Valid');
+    async (req: Request, res: Response) => {
+        const newUser: UserRegister = req.body.user;
+
+        if ((await getUserByEmail(newUser.email)) !== null) {
+            res.status(403).send({
+                errors: 'Email address taken',
+            });
+            return;
+        }
+
+        if ((await getUserByUsername(newUser.username)) !== null) {
+            res.status(403).send({
+                errors: 'Username taken',
+            });
+            return;
+        }
+
+        res.send('No errors');
     }
 );
 
