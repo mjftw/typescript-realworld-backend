@@ -16,6 +16,9 @@ export const appPort = parseInt(process.env.APP_PORT || '4000');
 export const dbHost = process.env.DB_HOST || 'localhost';
 export const dbPort = parseInt(process.env.DB_PORT || '5432');
 
+// Static env
+export const saltLength = 32;
+
 export function requireEnvVars(envNames: string[]): void {
     const missing = envNames.filter(
         (envName) => process.env[envName] === undefined

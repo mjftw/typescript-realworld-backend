@@ -31,8 +31,8 @@ export interface User extends UserBase {
 
 interface UserBase {
     username: string;
-    bio: string;
-    image: string | null;
+    bio?: string;
+    image?: string;
 }
 
 // ========== Article ==========

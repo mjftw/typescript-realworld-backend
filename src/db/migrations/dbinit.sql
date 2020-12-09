@@ -1,10 +1,10 @@
 CREATE TABLE users (
     user_id bigint GENERATED ALWAYS AS IDENTITY,
-    password_hash varchar(100) NOT NULL,
-    password_salt varchar(50) NOT NULL,
+    password_hash varchar(200) NOT NULL,
+    password_salt varchar(100) NOT NULL,
     email varchar(200) NOT NULL UNIQUE,
     username varchar(50) NOT NULL UNIQUE,
-    bio text NOT NULL,
+    bio text,
     image text,
     PRIMARY KEY(user_id)
 );

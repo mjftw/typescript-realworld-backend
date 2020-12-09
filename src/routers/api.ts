@@ -1,10 +1,10 @@
 import { Request, Response, Router } from 'express';
 import { Validator } from 'express-json-validator-middleware';
-import { loginUser, newAuthJwt } from '../common/auth';
+import { hashPassword, loginUser, newAuthJwt, newSalt } from '../common/auth';
 import { UserLoginSchema, UserRegisterSchema } from '../json_schemas/user';
 import { User, UserAuth, UserLogin, UserRegister } from '../common/types';
-import { jwtSecret } from '../config';
-import { getUserByEmail, getUserByUsername } from '../db/queries';
+import { jwtSecret, saltLength } from '../config';
+import { addUser, getUserByEmail, getUserByUsername } from '../db/queries';
 
 const router = Router();
 const validator = new Validator({ allErrors: true });
@@ -13,23 +13,39 @@ router.post(
     '/users/',
     validator.validate({ body: UserRegisterSchema }),
     async (req: Request, res: Response) => {
-        const newUser: UserRegister = req.body.user;
+        const signupRequest: UserRegister = req.body.user;
 
-        if ((await getUserByEmail(newUser.email)) !== null) {
+        if ((await getUserByEmail(signupRequest.email)) === null) {
             res.status(403).send({
                 errors: 'Email address taken',
             });
             return;
         }
 
-        if ((await getUserByUsername(newUser.username)) !== null) {
+        if ((await getUserByUsername(signupRequest.username)) === null) {
             res.status(403).send({
                 errors: 'Username taken',
             });
             return;
         }
 
-        res.send('No errors');
+        const salt = newSalt(saltLength);
+        const hashedPassword = hashPassword(signupRequest.password, salt);
+
+        const maybeUser = await addUser(
+            signupRequest.username,
+            signupRequest.email,
+            hashedPassword,
+            salt
+        );
+        if (maybeUser === null) {
+            res.status(500).send({
+                errors: 'Failed to create user',
+            });
+            return;
+        }
+
+        res.send(maybeUser);
     }
 );
 
