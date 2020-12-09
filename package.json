@@ -6,10 +6,10 @@
     "scripts": {
         "start": "node build/app.js",
         "prestart": "npm run tsc",
-        "test": "jest",
         "tsc": "tsc",
         "tsc:watch": "tsc --watch",
-        "test:api": "APIURL=http://localhost:3000/api ./scripts/run-api-tests.sh"
+        "test:api": "APIURL=http://localhost:3000/api ./scripts/run-api-tests.sh",
+        "test": ". ./test_env.sh && jest"
     },
     "repository": {
         "type": "git",
@@ -40,10 +40,12 @@
         "@types/express": "^4.17.9",
         "@types/jest": "^26.0.18",
         "@types/json-schema": "^7.0.6",
+        "@types/jsonwebtoken": "^8.5.0",
         "@types/pg": "^7.14.7",
         "express": "^4.17.1",
         "express-json-validator-middleware": "^2.1.1",
         "jest": "^26.6.3",
+        "jsonwebtoken": "^8.5.1",
         "pg": "^8.5.1",
         "ts-jest": "^26.4.4"
     }

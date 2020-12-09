@@ -1,4 +1,5 @@
-import { randomBytes } from 'crypto';
+// import { randomBytes } from 'crypto';
+import * as jwt from 'jsonwebtoken';
 import { User, UserLogin } from './types';
 import { getUserByEmail } from '../db/queries';
 
@@ -24,9 +25,12 @@ export async function loginUser(userLogin: UserLogin): Promise<User | Error> {
 }
 
 //TODO: Add expiry date to tokens
-export function newAuthJwt(id: number): string {
-    //TODO: Create JWT for user login (including user ID as data)
-    return 'Foo';
+export function newAuthJwt(id: number, secret: string): string {
+    const payload = {
+        uid: id,
+    };
+
+    return jwt.sign(payload, secret);
 }
 
 // function hashPassword(password: string, salt: string): string {

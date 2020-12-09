@@ -1,6 +1,6 @@
 import { Request, Response, Router } from 'express';
 import { Validator } from 'express-json-validator-middleware';
-import { loginUser } from '../common/auth';
+import { loginUser, newAuthJwt } from '../common/auth';
 import { UserLoginSchema } from '../json_schemas/user';
 import { User, UserAuth, UserLogin } from '../common/types';
 import { types } from 'util';
@@ -26,6 +26,8 @@ router.post(
         }
         1;
         const user = maybeUser;
+
+        const token = newAuthJwt(user.id);
 
         const mockUser: UserAuth = {
             email: user.email,

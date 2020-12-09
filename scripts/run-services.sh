@@ -1,9 +1,9 @@
 # Express app configuration
 export APP_PORT="4000"
-export HOSTNAME="localhost"
+export JWT_SECRET="R4nLO7gmmmGt1kTEWtrw"
 
 # PostgreSQL database configuration
-export DB_USER="admin"
+export DB_USERNAME="admin"
 export DB_PASSWORD="secret"
 export DB_PORT="35432"
 export DB_NAME="realworld-backend-app"

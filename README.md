@@ -31,8 +31,8 @@ A number of configuration environment variables are used to configure the app.
 | Variable name    | Description                                 | Example            |
 | ---------------- | ------------------------------------------- | ------------------ |
 | APP_PORT         | Port to expose the app on                   | 4000               |
-| APP_HOST         | Hostname to use for the app                 | localhost          |
-| DB_USER          | Username to be used for postgreSQL database | postgres           |
+| JWT_SECRET       | Secret to use for signing JWT auth tokens   | arandomstring      |
+| DB_USERNAME      | Username to be used for postgreSQL database | postgres           |
 | DB_PASSWORD      | Password to be used for postgreSQL database | postgres           |
 | DB_NAME          | Name to be used for postgreSQL database     | postgres           |
 | DB_PORT          | Port to expose the database on              | 5432               |

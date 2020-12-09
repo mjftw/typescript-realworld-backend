@@ -9,10 +9,11 @@ services:
         environment:
             NODE_ENV: development
             PORT: ${APP_PORT}
+            JWT_SECRET: ${JWT_SECRET}
             DB_HOST: db-server
             DB_PORT: 5432
             DB_NAME: ${DB_NAME}
-            DB_USERNAME: ${DB_USER}
+            DB_USERNAME: ${DB_USERNAME}
             DB_PASSWORD: ${DB_PASSWORD}
         ports:
             - ${APP_PORT}:${APP_PORT}
@@ -26,7 +27,7 @@ services:
         container_name: postgres
         restart: always
         environment:
-            POSTGRES_USER: '${DB_USER}'
+            POSTGRES_USER: '${DB_USERNAME}'
             POSTGRES_DB: ${DB_NAME}
             POSTGRES_PASSWORD: '${DB_PASSWORD}'
         volumes:
