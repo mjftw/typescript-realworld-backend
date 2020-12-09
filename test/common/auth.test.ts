@@ -7,3 +7,8 @@ test('newAuthJwt creates a string matching JWT regex', () => {
         /^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$/
     );
 });
+
+test('newSalt returns hex of correct length', () => {
+    const salt = auth.newSalt(32);
+    expect(salt).toMatch(/^[0-9a-fA-F]{32}$/);
+});

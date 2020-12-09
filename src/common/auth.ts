@@ -1,6 +1,6 @@
-// import { randomBytes } from 'crypto';
+import { randomBytes } from 'crypto';
 import * as jwt from 'jsonwebtoken';
-import { User, UserLogin } from './types';
+import { JwtAuth, User, UserLogin } from './types';
 import { getUserByEmail } from '../db/queries';
 
 export async function loginUser(userLogin: UserLogin): Promise<User | Error> {
@@ -26,7 +26,7 @@ export async function loginUser(userLogin: UserLogin): Promise<User | Error> {
 
 //TODO: Add expiry date to tokens
 export function newAuthJwt(id: number, secret: string): string {
-    const payload = {
+    const payload: JwtAuth = {
         uid: id,
     };
 
@@ -37,6 +37,8 @@ export function newAuthJwt(id: number, secret: string): string {
 //     return 'Foo';
 // }
 
-// function newSalt(length: number): string {
-//     return 'Foo';
-// }
+export function newSalt(length: number): string {
+    return randomBytes(Math.ceil(length / 2))
+        .toString('hex')
+        .slice(0, length);
+}

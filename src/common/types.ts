@@ -64,3 +64,8 @@ export interface Tag {
     id: number;
     title: string;
 }
+
+// ========== Auth ==========
+export interface JwtAuth {
+    uid: number;
+}
