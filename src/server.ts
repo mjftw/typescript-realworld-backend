@@ -1,4 +1,5 @@
 import express, { json } from 'express';
+import morgan from 'morgan';
 import api_router from './routers/api';
 import schemaValidationError from './routers/errors';
 
@@ -19,6 +20,8 @@ class Server {
     }
 
     private serverConfig() {
+        const logger = morgan('dev');
+        this.app.use(logger);
         this.app.use(json());
     }
 
