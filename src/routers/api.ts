@@ -1,9 +1,14 @@
 import { Request, Response, Router } from 'express';
 import { Validator } from 'express-json-validator-middleware';
-import { hashPassword, loginUser, newAuthJwt, newSalt } from '../common/auth';
+import {
+    createUserAuth,
+    hashPassword,
+    loginUser,
+    newSalt,
+} from '../common/auth';
 import { UserLoginSchema, UserRegisterSchema } from '../json_schemas/user';
-import { User, UserAuth, UserLogin, UserRegister } from '../common/types';
-import { jwtSecret, saltLength } from '../config';
+import { User, UserLogin, UserRegister } from '../common/types';
+import { saltLength } from '../config';
 import { addUser, getUserByEmail, getUserByUsername } from '../db/queries';
 
 const router = Router();
@@ -15,14 +20,13 @@ router.post(
     async (req: Request, res: Response) => {
         const signupRequest: UserRegister = req.body.user;
 
-        if ((await getUserByEmail(signupRequest.email)) === null) {
+        if ((await getUserByEmail(signupRequest.email)) !== null) {
             res.status(403).send({
                 errors: 'Email address taken',
             });
             return;
         }
-
-        if ((await getUserByUsername(signupRequest.username)) === null) {
+        if ((await getUserByUsername(signupRequest.username)) !== null) {
             res.status(403).send({
                 errors: 'Username taken',
             });
@@ -45,7 +49,8 @@ router.post(
             return;
         }
 
-        res.send(maybeUser);
+        const auth = createUserAuth(maybeUser);
+        res.send({ user: auth });
     }
 );
 
@@ -67,24 +72,9 @@ router.post(
             });
             return;
         }
-        const user = maybeUser;
-        const token = newAuthJwt(user.id, jwtSecret);
 
-        const mockUser: UserAuth = {
-            email: user.email,
-            username: user.username,
-            bio: user.bio,
-            image: user.image,
-            token: token,
-        };
-
-        res.send(mockUser);
-
-        //TODO:
-        // 1. Login user
-        // 2. Generate JWT auth token
-        // 3. Populate and return UserAuth
-        // 4. Send response with new user
+        const auth = createUserAuth(maybeUser);
+        res.send({ user: auth });
     }
 );
 
