@@ -18,6 +18,7 @@ export const dbPort = parseInt(process.env.DB_PORT || '5432');
 
 // Static env
 export const saltLength = 32;
+export const jtwHmacAlgorithm = 'HS256';
 
 export function requireEnvVars(envNames: string[]): void {
     const missing = envNames.filter(

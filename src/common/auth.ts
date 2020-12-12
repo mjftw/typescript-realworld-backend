@@ -1,12 +1,11 @@
 import { createHmac, randomBytes } from 'crypto';
 import * as jwt from 'jsonwebtoken';
-import { JwtAuth, User, UserAuth, UserLogin } from './types';
+import { UserAuth, User, JwtAuth, UserLogin } from './types';
 import { getUserByEmail } from '../db/queries';
-import { jwtSecret } from '../config';
+import { jtwHmacAlgorithm, jwtSecret } from '../config';
 
 export async function loginUser(userLogin: UserLogin): Promise<User | null> {
-    //TODO: 1. Check if user already logged in, error if so
-
+    //TODO: This is slow and rubbish. Let the database do the check for existing users with constraints!
     const user = await getUserByEmail(userLogin.email);
 
     if (user === null) {
@@ -26,10 +25,9 @@ export async function loginUser(userLogin: UserLogin): Promise<User | null> {
 //TODO: Add expiry date to tokens
 export function newAuthJwt(id: number, secret: string): string {
     const payload: JwtAuth = {
-        uid: id,
+        userId: id,
     };
-
-    return jwt.sign(payload, secret);
+    return jwt.sign(payload, secret, { algorithm: jtwHmacAlgorithm });
 }
 
 export function createUserAuth(user: User): UserAuth {

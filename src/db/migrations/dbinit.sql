@@ -1,3 +1,5 @@
+-- TODO: Add column constraints to force data format. E.g. email addresses
+
 CREATE TABLE users (
     user_id bigint GENERATED ALWAYS AS IDENTITY,
     password_hash varchar(200) NOT NULL,

@@ -1,4 +1,5 @@
 // ========== User ==========
+
 // Used for login requests
 export interface UserLogin {
     email: string;
@@ -67,5 +68,10 @@ export interface Tag {
 
 // ========== Auth ==========
 export interface JwtAuth {
-    uid: number;
+    userId: number;
+}
+
+// ========== Errors ==========
+export interface ErrResponseBody {
+    errors: unknown;
 }

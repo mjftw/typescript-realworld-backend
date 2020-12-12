@@ -65,7 +65,15 @@ export async function addUser(
         [email, username, password_hash, password_salt]
     );
     client.release();
+    const newUser = result.rows[0];
 
-    const newUser: User = result.rows[0];
-    return newUser;
+    // Extracting specific fields to protect against DB schema changes
+    return {
+        id: newUser.user_id,
+        email: newUser.email,
+        username: newUser.username,
+        bio: newUser.bio,
+        password_hash: newUser.password_hash,
+        password_salt: newUser.password_salt,
+    };
 }

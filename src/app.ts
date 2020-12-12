@@ -1,4 +1,4 @@
-import Server from './server';
+import Server from './server/server';
 import { appPort } from './config';
 
 const server = new Server();
