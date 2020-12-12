@@ -77,6 +77,7 @@ export async function addUser(
         email: newUser.email,
         username: newUser.username,
         bio: newUser.bio,
+        image: newUser.image,
         password_hash: newUser.password_hash,
         password_salt: newUser.password_salt,
     };
