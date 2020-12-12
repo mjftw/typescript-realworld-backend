@@ -64,7 +64,7 @@ class Server {
 
     private routerMiddleware() {
         this.app.use('/api', api_router);
-        this.app.use('/', (_req, res) => res.send('It lives!'));
+        this.app.use(/^\/$/, (_req, res) => res.send('It lives!'));
     }
 
     private errorHandlerMiddleware() {
