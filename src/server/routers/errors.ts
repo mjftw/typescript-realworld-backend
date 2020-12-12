@@ -8,11 +8,10 @@ export function schemaValidationError(
     res: Response,
     next: NextFunction
 ): void {
-    if (err?.name !== 'JsonSchemaValidationError') {
-        next(err);
+    if (err?.name === 'JsonSchemaValidationError') {
+        res.status(422).json(errResponse(err.validationErrors));
     }
-
-    res.status(422).json(errResponse(err.validationErrors));
+    next();
 }
 
 export function unhandledErrors(
@@ -25,7 +24,6 @@ export function unhandledErrors(
         res.status(500).send(
             errResponse(`Internal server error ${err.name}: ${err.message}`)
         );
-        return;
     }
     next();
 }
