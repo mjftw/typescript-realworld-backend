@@ -4,8 +4,8 @@ import { UserAuth, User, JwtAuth, UserLogin } from './types';
 import { getUserByEmail } from '../db/queries';
 import { jtwHmacAlgorithm, jwtSecret } from '../config';
 
+//TODO: Better error handling than just returning null (throughout codebase!)
 export async function loginUser(userLogin: UserLogin): Promise<User | null> {
-    //TODO: This is slow and rubbish. Let the database do the check for existing users with constraints!
     const user = await getUserByEmail(userLogin.email);
 
     if (user === null) {

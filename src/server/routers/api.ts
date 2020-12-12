@@ -15,6 +15,7 @@ import { errResponse } from '../utils';
 const router = Router();
 const validator = new Validator({ allErrors: true });
 
+// Register new user
 router.post(
     '/users/',
     validator.validate({ body: UserRegisterSchema }),
@@ -49,13 +50,13 @@ router.post(
     }
 );
 
+// Log user in
 router.post(
     '/users/login/',
     validator.validate({
         body: UserLoginSchema,
     }),
     async (req: Request, res: Response): Promise<void> => {
-        //TODO: 1. Check if user already logged in, error if so
         // Valid user at this point
         const userLogin: UserLogin = req.body.user;
 

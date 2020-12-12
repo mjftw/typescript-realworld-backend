@@ -35,7 +35,7 @@ class Server {
         // Do not require user auth JWT on these routes
         const skipAuthOn: unless.Options = {
             path: [
-                { methods: ['GET'], url: '/' }, // For testing - Check server is up
+                { methods: ['GET'], url: '/' },
                 { methods: ['POST'], url: '/api/users/login' },
                 { methods: ['POST'], url: '/api/users' },
             ],
@@ -64,7 +64,7 @@ class Server {
 
     private routerMiddleware() {
         this.app.use('/api', api_router);
-        this.app.use(/^\/$/, (_req, res) => res.send('It lives!'));
+        this.app.get(/^\/$/, (_req, res) => res.send('It lives!')); // For testing - Check server is up
     }
 
     private errorHandlerMiddleware() {

@@ -1,6 +1,10 @@
 import pool from './dbconfig';
 import { User } from '../common/types';
 
+//TODO: Need add database error handling throughout:
+//      - Report some error in the response body
+//      - Ensure client is released from pool on database error
+
 export function getUserByEmail(email: string): Promise<User | null> {
     return getUserBy('email', email);
 }
