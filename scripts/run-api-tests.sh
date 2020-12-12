@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 set -x
 
+
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
-APIURL=${APIURL:-https://conduit.productionready.io/api}
-USERNAME=${USERNAME:-u`date +%s`}
-EMAIL=${EMAIL:-$USERNAME@mail.com}
-PASSWORD=${PASSWORD:-password}
+APIURL="http://localhost:4000/api"
+USERNAME="testuser-$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 10 | head -n 1)"
+EMAIL="${USERNAME}@mail.com"
+PASSWORD=password
 
 npx newman run $SCRIPTDIR/Conduit.postman_collection.json \
   --delay-request 500 \
