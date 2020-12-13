@@ -1,16 +1,5 @@
 // ========== User ==========
 
-// Used for login requests
-export interface UserLogin {
-    email: string;
-    password: string;
-}
-
-// Used for registration requests
-export interface UserRegister extends UserLogin {
-    username: string;
-}
-
 // Returned by authentication requests
 export interface UserAuth extends UserBase {
     email: string;
@@ -72,9 +61,5 @@ export interface JwtAuth {
 }
 
 // ========== Errors ==========
-export interface ErrResponseBody {
-    errors: unknown;
-}
-
 // Error codes that server can return
 export type HttpErrorCode = 401 | 403 | 404 | 422 | 500;

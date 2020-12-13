@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { ErrResponseBody, HttpErrorCode } from '../common/types';
+import { HttpErrorCode } from '../common/types';
 import { logResponseErrors } from '../config';
 
 export function getJwtFromRequest(request: Request): string | undefined {
@@ -17,8 +17,16 @@ export function getJwtFromRequest(request: Request): string | undefined {
     return auth_split[1];
 }
 
+export function getCurrentUser(req: Request): number | undefined {
+    return req.auth?.userId;
+}
+
 // Send an error response in standard format.
 // If the configuration 'logResponseErrors' is true, also log the error to the console
+interface ErrResponseBody {
+    errors: unknown;
+}
+
 export function sendErrResponse(
     res: Response,
     code: HttpErrorCode,
@@ -27,10 +35,6 @@ export function sendErrResponse(
     if (logResponseErrors) {
         console.error(`Error ${code}: ${JSON.stringify(detail, undefined, 2)}`);
     }
-    res.status(code).send(errResponse(detail));
-}
-
-// Format to be used when creating error responses
-function errResponse(detail: unknown): ErrResponseBody {
-    return { errors: detail };
+    const body: ErrResponseBody = { errors: detail };
+    res.status(code).send(body);
 }

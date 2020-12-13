@@ -1,19 +1,22 @@
 import { createHmac, randomBytes } from 'crypto';
 import * as jwt from 'jsonwebtoken';
-import { UserAuth, User, JwtAuth, UserLogin } from './types';
+import { UserAuth, User, JwtAuth } from './types';
 import { getUserByEmail } from '../db/queries';
 import { jtwHmacAlgorithm, jwtSecret } from '../config';
 
 //TODO: Better error handling than just returning null (throughout codebase!)
-export async function loginUser(userLogin: UserLogin): Promise<User | null> {
-    const user = await getUserByEmail(userLogin.email);
+export async function loginUser(
+    email: string,
+    password: string
+): Promise<User | null> {
+    const user = await getUserByEmail(email);
 
     if (user === null) {
         // No user found with email
         return null;
     }
 
-    const hashedPassword = hashPassword(userLogin.password, user.password_salt);
+    const hashedPassword = hashPassword(password, user.password_salt);
     if (hashedPassword !== user.password_hash) {
         //Incorrect Password
         return null;
