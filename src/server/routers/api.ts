@@ -10,7 +10,7 @@ import { UserLoginSchema, UserRegisterSchema } from '../../json_schemas/user';
 import { User, UserLogin, UserRegister } from '../../common/types';
 import { saltLength } from '../../config';
 import { addUser, getUserByEmail, getUserByUsername } from '../../db/queries';
-import { errResponse } from '../utils';
+import { sendErrResponse } from '../utils';
 
 const router = Router();
 const validator = new Validator({ allErrors: true });
@@ -24,11 +24,11 @@ router.post(
         const signupRequest: UserRegister = req.body.user;
 
         if ((await getUserByEmail(signupRequest.email)) !== null) {
-            res.status(403).send(errResponse('Email address taken'));
+            sendErrResponse(res, 403, 'Email address taken');
             return;
         }
         if ((await getUserByUsername(signupRequest.username)) !== null) {
-            res.status(403).send(errResponse('Username taken'));
+            sendErrResponse(res, 403, 'Username taken');
             return;
         }
 
@@ -63,9 +63,7 @@ router.post(
         const maybeUser: User | null = await loginUser(userLogin);
         if (maybeUser === null) {
             //NOTE: This could be invalid auth or nonexistent user
-            res.status(401).send(
-                errResponse('Incorrect email address or password')
-            );
+            sendErrResponse(res, 401, 'Incorrect email address or password');
             return;
         }
 

@@ -75,3 +75,6 @@ export interface JwtAuth {
 export interface ErrResponseBody {
     errors: unknown;
 }
+
+// Error codes that server can return
+export type HttpErrorCode = 401 | 403 | 404 | 422 | 500;

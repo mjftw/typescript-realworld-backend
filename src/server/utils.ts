@@ -1,5 +1,5 @@
-import { Request } from 'express';
-import { ErrResponseBody } from '../common/types';
+import { Request, Response } from 'express';
+import { ErrResponseBody, HttpErrorCode } from '../common/types';
 
 export function getJwtFromRequest(request: Request): string | undefined {
     const auth = request.headers.authorization;
@@ -18,7 +18,15 @@ export function getJwtFromRequest(request: Request): string | undefined {
     return auth_split[1];
 }
 
+export function sendErrResponse(
+    res: Response,
+    code: HttpErrorCode,
+    detail: unknown
+): void {
+    res.status(code).send(errResponse(detail));
+}
+
 // Format to be used when creating error responses
-export function errResponse(detail: unknown): ErrResponseBody {
+function errResponse(detail: unknown): ErrResponseBody {
     return { errors: detail };
 }

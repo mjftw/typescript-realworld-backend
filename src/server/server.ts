@@ -5,7 +5,7 @@ import unless from 'express-unless';
 import api_router from './routers/api';
 import { schemaValidationError, unhandledErrors } from './routers/errors';
 import { jtwHmacAlgorithm, jwtSecret } from '../config';
-import { errResponse, getJwtFromRequest } from './utils';
+import { getJwtFromRequest, sendErrResponse } from './utils';
 
 class Server {
     private app;
@@ -52,9 +52,7 @@ class Server {
             }).unless(skipAuthOn),
             (err: Error, _req: Request, res: Response, next: NextFunction) => {
                 if (err.name === 'UnauthorizedError') {
-                    res.status(401).send(
-                        errResponse(`Unauthorized: ${err.message}`)
-                    );
+                    sendErrResponse(res, 401, `Unauthorized: ${err.message}`);
                     return;
                 }
                 next();
