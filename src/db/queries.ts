@@ -13,8 +13,15 @@ export function getUserByUsername(username: string): Promise<User | null> {
     return getUserBy('username', username);
 }
 
+export function getUserById(id: number): Promise<User | null> {
+    return getUserBy('user_id', id);
+}
+
 // Do not use user input as column, this is unsantised in query and could result in SQL injection!
-async function getUserBy(column: string, value: string): Promise<User | null> {
+async function getUserBy(
+    column: string,
+    value: string | number
+): Promise<User | null> {
     const client = await pool.connect();
     const result = await client.query(
         `
@@ -38,9 +45,17 @@ async function getUserBy(column: string, value: string): Promise<User | null> {
     if (result.rowCount == 0) {
         return null;
     }
-    const user: User = result.rows[0];
+    const dbUser = result.rows[0];
 
-    return user;
+    return {
+        id: dbUser.user_id,
+        username: dbUser.username,
+        email: dbUser.email,
+        bio: dbUser.bio,
+        image: dbUser.bio,
+        password_hash: dbUser.password_hash,
+        password_salt: dbUser.password_salt,
+    };
 }
 
 export async function addUser(

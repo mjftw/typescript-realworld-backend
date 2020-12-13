@@ -1,4 +1,4 @@
-import { Response, Router } from 'express';
+import { Request, Response, Router } from 'express';
 import { Validator } from 'express-json-validator-middleware';
 import {
     createUserAuth,
@@ -9,8 +9,13 @@ import {
 import { UserLoginSchema, UserRegisterSchema } from '../../json_schemas/user';
 import { User, UserAuth } from '../../common/types';
 import { saltLength } from '../../config';
-import { addUser, getUserByEmail, getUserByUsername } from '../../db/queries';
-import { sendErrResponse } from '../utils';
+import {
+    addUser,
+    getUserByEmail,
+    getUserById,
+    getUserByUsername,
+} from '../../db/queries';
+import { getCurrentUser, getJwtFromRequest, sendErrResponse } from '../utils';
 
 const router = Router();
 const validator = new Validator({ allErrors: true });
@@ -92,6 +97,41 @@ router.post(
 
         const responseBody: UserResponseBody = {
             user: createUserAuth(maybeUser),
+        };
+        res.send(responseBody);
+    }
+);
+
+router.get(
+    '/user/',
+    async (req: Request, res: Response): Promise<void> => {
+        const userId = getCurrentUser(req);
+        if (!userId) {
+            console.log('Auth: ' + JSON.stringify(req.auth, undefined, 2));
+            sendErrResponse(res, 500, 'Invalid JWT format: missing user ID');
+            return;
+        }
+
+        const maybeUser = await getUserById(userId);
+        if (!maybeUser) {
+            sendErrResponse(res, 404, 'No user matching JWT user auth');
+            return;
+        }
+
+        const maybeToken = getJwtFromRequest(req);
+        if (!maybeToken) {
+            sendErrResponse(res, 500, 'Unable to get token from request');
+            return;
+        }
+
+        const responseBody: UserResponseBody = {
+            user: {
+                email: maybeUser.email,
+                username: maybeUser.username,
+                bio: maybeUser.bio,
+                image: maybeUser.image,
+                token: maybeToken,
+            },
         };
         res.send(responseBody);
     }
