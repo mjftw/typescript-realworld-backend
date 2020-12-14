@@ -30,6 +30,47 @@ export async function updateUser(
     );
 }
 
+export async function createUser(
+    username: string,
+    email: string,
+    password_hash: string,
+    password_salt: string
+): Promise<UserDbSchema | Error> {
+    return create<UserDbSchema>('users', {
+        username: username,
+        email: email,
+        password_hash: password_hash,
+        password_salt: password_salt,
+    });
+}
+
+async function create<T extends Object>(
+    table: string,
+    columns: Partial<T>
+): Promise<T | Error> {
+    const columnsString = Object.keys(columns).join(', ');
+    const valuesString = Object.keys(columns)
+        .map((_, idx) => `$${idx + 1}`)
+        .join(', ');
+    const client = await pool.connect();
+    const result = await client.query(
+        `
+        INSERT INTO ${table}(${columnsString})
+        VALUES (${valuesString})
+        RETURNING *;
+    `,
+        Object.values(columns)
+    );
+    client.release();
+
+    if (result.rowCount < 1) {
+        return Error('No records were created');
+    }
+
+    const updated: T = result.rows[0];
+    return updated;
+}
+
 async function read<T extends Object>(
     table: string,
     uniqueKey: { column: string; value: unknown },
@@ -56,46 +97,6 @@ async function read<T extends Object>(
 
     const found: T = result.rows[0];
     return found;
-}
-
-export async function addUser(
-    username: string,
-    email: string,
-    password_hash: string,
-    password_salt: string
-): Promise<UserDbSchema | null> {
-    const client = await pool.connect();
-    const result = await client.query(
-        `
-        INSERT INTO users (
-            email,
-            username,
-            password_hash,
-            password_salt
-        )
-        VALUES (
-            $1,
-            $2,
-            $3,
-            $4
-        )
-        RETURNING *;
-    `,
-        [email, username, password_hash, password_salt]
-    );
-    client.release();
-    const newUser = result.rows[0];
-
-    // Extracting specific fields to protect against DB schema changes
-    return {
-        user_id: newUser.user_id,
-        email: newUser.email,
-        username: newUser.username,
-        bio: newUser.bio,
-        image: newUser.image,
-        password_hash: newUser.password_hash,
-        password_salt: newUser.password_salt,
-    };
 }
 
 async function update<T extends Object>(
@@ -132,7 +133,4 @@ async function update<T extends Object>(
     return updated;
 }
 
-//TODO: Make generic database function: create
-//TODO: Make generic database function: read
-//TODO: Make generic database function: update ^^^ above
 //TODO: Make generic database function: delete

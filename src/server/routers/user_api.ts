@@ -14,7 +14,7 @@ import {
 import { UserDbSchema, UserAuth } from '../../common/types';
 import { saltLength } from '../../config';
 import {
-    addUser,
+    createUser,
     getUserByEmail,
     getUserById,
     getUserByUsername,
@@ -56,17 +56,18 @@ router.post(
         const salt = newSalt(saltLength);
         const hashedPassword = hashPassword(reqUser.password, salt);
 
-        const maybeUser = await addUser(
+        const user = await createUser(
             reqUser.username,
             reqUser.email,
             hashedPassword,
             salt
         );
-        if (maybeUser === null) {
-            throw Error('Failed to create user');
+        if (user instanceof Error) {
+            sendErrResponse(res, 500, 'Failed to create user');
+            return;
         }
 
-        const auth = createUserAuth(maybeUser);
+        const auth = createUserAuth(user);
         res.send({ user: auth });
     }
 );
