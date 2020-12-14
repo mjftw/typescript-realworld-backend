@@ -11,7 +11,7 @@ import {
     UserRegisterSchema,
     UserUpdateSchema,
 } from '../../json_schemas/user';
-import { UserDbSchema, UserAuth } from '../../common/types';
+import { UserAuth } from '../../common/types';
 import { saltLength } from '../../config';
 import {
     createUser,
@@ -21,6 +21,7 @@ import {
     updateUser,
 } from '../../db/queries';
 import { getCurrentUserId, getJwtFromRequest, sendErrResponse } from '../utils';
+import { UserDbSchema } from '../../db/schemaTypes';
 
 const router = Router();
 const validator = new Validator({ allErrors: true });

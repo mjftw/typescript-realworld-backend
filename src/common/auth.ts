@@ -1,8 +1,9 @@
 import { createHmac, randomBytes } from 'crypto';
 import * as jwt from 'jsonwebtoken';
-import { UserAuth, UserDbSchema, JwtAuth } from './types';
+import { UserAuth, JwtAuth } from './types';
 import { getUserByEmail } from '../db/queries';
 import { jtwHmacAlgorithm, jwtSecret } from '../config';
+import { UserDbSchema } from '../db/schemaTypes';
 
 //TODO: Better error handling than just returning null (throughout codebase!)
 export async function loginUser(

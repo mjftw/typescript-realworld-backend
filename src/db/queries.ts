@@ -1,5 +1,5 @@
 import pool from './dbconfig';
-import { UserDbSchema } from '../common/types';
+import { UserDbSchema } from './schemaTypes';
 
 //TODO: Need add database error handling throughout:
 //      - Report some error in the response body
