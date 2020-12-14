@@ -52,23 +52,27 @@ async function create<T extends Object>(
     const valuesString = Object.keys(columns)
         .map((_, idx) => `$${idx + 1}`)
         .join(', ');
+
     const client = await pool.connect();
-    const result = await client.query(
-        `
-        INSERT INTO ${table}(${columnsString})
-        VALUES (${valuesString})
-        RETURNING *;
-    `,
-        Object.values(columns)
-    );
-    client.release();
+    return client
+        .query(
+            `
+            INSERT INTO ${table}(${columnsString})
+            VALUES (${valuesString})
+            RETURNING *;
+            `,
+            Object.values(columns)
+        )
+        .then((result) => {
+            if (result.rowCount < 1) {
+                return Error('No records were created');
+            }
 
-    if (result.rowCount < 1) {
-        return Error('No records were created');
-    }
-
-    const updated: T = result.rows[0];
-    return updated;
+            const updated: T = result.rows[0];
+            return updated;
+        })
+        .catch((error) => error)
+        .finally(() => client.release());
 }
 
 async function read<T extends Object>(
@@ -78,25 +82,28 @@ async function read<T extends Object>(
 ): Promise<T | Error> {
     const columnsString = columns ? columns.join(', ') : '*';
     const client = await pool.connect();
-    const result = await client.query(
-        `
-        SELECT ${columnsString}
-        FROM ${table}
-        WHERE ${uniqueKey.column} = $1;
-    `,
-        [uniqueKey.value]
-    );
-    client.release();
+    return client
+        .query(
+            `
+            SELECT ${columnsString}
+            FROM ${table}
+            WHERE ${uniqueKey.column} = $1;
+            `,
+            [uniqueKey.value]
+        )
+        .then((result) => {
+            if (result.rowCount < 1) {
+                return Error('No records were found');
+            }
+            if (result.rowCount > 1) {
+                return Error('Multiple records were found');
+            }
 
-    if (result.rowCount < 1) {
-        return Error('No records were found');
-    }
-    if (result.rowCount > 1) {
-        return Error('Multiple records were found');
-    }
-
-    const found: T = result.rows[0];
-    return found;
+            const found: T = result.rows[0];
+            return found;
+        })
+        .catch((error) => error)
+        .finally(() => client.release());
 }
 
 async function update<T extends Object>(
@@ -114,23 +121,26 @@ async function update<T extends Object>(
     //TODO: Add check that ONLY 1 row will be updated, abort if more
 
     const client = await pool.connect();
-    const result = await client.query(
-        `
+    return client
+        .query(
+            `
         UPDATE ${table}
         SET ${setAssigns}
         WHERE ${uniqueKey.column} = ${idSub}
         RETURNING *;
     `,
-        values
-    );
-    client.release();
+            values
+        )
+        .then((result) => {
+            if (result.rowCount < 1) {
+                return Error('No records were updated');
+            }
 
-    if (result.rowCount < 1) {
-        return Error('No records were updated');
-    }
-
-    const updated: T = result.rows[0];
-    return updated;
+            const updated: T = result.rows[0];
+            return updated;
+        })
+        .catch((error) => error)
+        .finally(() => client.release());
 }
 
 //TODO: Make generic database function: delete
