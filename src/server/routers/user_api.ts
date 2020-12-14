@@ -6,16 +6,21 @@ import {
     loginUser,
     newSalt,
 } from '../../common/auth';
-import { UserLoginSchema, UserRegisterSchema } from '../../json_schemas/user';
-import { User, UserAuth } from '../../common/types';
+import {
+    UserLoginSchema,
+    UserRegisterSchema,
+    UserUpdateSchema,
+} from '../../json_schemas/user';
+import { UserDbSchema, UserAuth } from '../../common/types';
 import { saltLength } from '../../config';
 import {
     addUser,
     getUserByEmail,
     getUserById,
     getUserByUsername,
+    updateUser,
 } from '../../db/queries';
-import { getCurrentUser, getJwtFromRequest, sendErrResponse } from '../utils';
+import { getCurrentUserId, getJwtFromRequest, sendErrResponse } from '../utils';
 
 const router = Router();
 const validator = new Validator({ allErrors: true });
@@ -32,14 +37,13 @@ interface UserRegisterReqBody {
         username: string;
     };
 }
-
 router.post(
     '/users/',
     validator.validate({ body: UserRegisterSchema }),
-    async (
-        { body: { user: reqUser } }: { body: UserRegisterReqBody },
-        res: Response
-    ) => {
+    async (req: Request, res: Response): Promise<void> => {
+        // Valid user at this point
+        const { user: reqUser }: UserRegisterReqBody = req.body;
+
         // Valid user register data at this point
         if ((await getUserByEmail(reqUser.email)) !== null) {
             sendErrResponse(res, 403, 'Email address taken');
@@ -80,12 +84,10 @@ router.post(
     validator.validate({
         body: UserLoginSchema,
     }),
-    async (
-        { body: { user: reqUser } }: { body: UserLoginReqBody },
-        res: Response
-    ): Promise<void> => {
+    async (req: Request, res: Response): Promise<void> => {
         // Valid user at this point
-        const maybeUser: User | null = await loginUser(
+        const { user: reqUser }: UserLoginReqBody = req.body;
+        const maybeUser: UserDbSchema | null = await loginUser(
             reqUser.email,
             reqUser.password
         );
@@ -102,12 +104,12 @@ router.post(
     }
 );
 
+// Get current user
 router.get(
     '/user/',
     async (req: Request, res: Response): Promise<void> => {
-        const userId = getCurrentUser(req);
+        const userId = getCurrentUserId(req);
         if (!userId) {
-            console.log('Auth: ' + JSON.stringify(req.auth, undefined, 2));
             sendErrResponse(res, 500, 'Invalid JWT format: missing user ID');
             return;
         }
@@ -134,6 +136,67 @@ router.get(
             },
         };
         res.send(responseBody);
+    }
+);
+
+// Update current user
+interface UserUpdateReqBody {
+    user: {
+        email?: string;
+        username?: string;
+        password?: string;
+        image?: string;
+        bio?: string;
+    };
+}
+router.put(
+    '/user/',
+    validator.validate({ body: UserUpdateSchema }),
+    async (req: Request, res: Response): Promise<void> => {
+        const userId = getCurrentUserId(req);
+        if (userId === undefined) {
+            sendErrResponse(res, 500, 'Could not get user ID');
+            return;
+        }
+        const token = getJwtFromRequest(req);
+        if (token === undefined) {
+            sendErrResponse(res, 500, 'Could not get token');
+            return;
+        }
+
+        const { user: reqUser }: UserUpdateReqBody = req.body;
+
+        let { password, ...others } = reqUser;
+        let updates: Partial<UserDbSchema> = others;
+
+        // If password, add new hashed password and salt to update
+        if (password) {
+            const salt = newSalt(saltLength);
+            const hashedPassword = hashPassword(password, salt);
+            updates = {
+                ...others,
+                password_salt: salt,
+                password_hash: hashedPassword,
+            };
+        }
+
+        const updatedUser = await updateUser(userId, updates);
+        if (updatedUser instanceof Error) {
+            sendErrResponse(res, 500, updatedUser);
+            return;
+        }
+
+        const body: UserResponseBody = {
+            user: {
+                email: updatedUser.email,
+                username: updatedUser.username,
+                bio: updatedUser.bio,
+                image: updatedUser.image,
+                token,
+            },
+        };
+
+        res.send(body);
     }
 );
 

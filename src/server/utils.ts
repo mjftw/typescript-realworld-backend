@@ -17,7 +17,7 @@ export function getJwtFromRequest(request: Request): string | undefined {
     return auth_split[1];
 }
 
-export function getCurrentUser(req: Request): number | undefined {
+export function getCurrentUserId(req: Request): number | undefined {
     return req.auth?.userId;
 }
 

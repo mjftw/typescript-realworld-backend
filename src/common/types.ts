@@ -12,20 +12,24 @@ export interface UserProfile extends UserBase {
     following: boolean;
 }
 
-export interface User extends UserBase {
-    id: number;
-    email: string;
-    password_hash: string;
-    password_salt: string;
-}
-
 interface UserBase {
     username: string;
     bio?: string;
     image?: string;
 }
 
-// ========== Article ==========
+// ========== DbSchemas ==========
+
+export type UserDbSchema = {
+    user_id: number;
+    email: string;
+    username: string;
+    bio?: string;
+    image?: string;
+    password_hash: string;
+    password_salt: string;
+};
+
 export interface Article {
     id: number;
     slug: string;

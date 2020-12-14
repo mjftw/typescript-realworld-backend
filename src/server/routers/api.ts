@@ -3,6 +3,6 @@ import userApiRouter from './user_api';
 
 const router = Router();
 
-router.use('/user?s/', userApiRouter);
+router.use(userApiRouter);
 
 export default router;

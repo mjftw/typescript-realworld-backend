@@ -1,6 +1,6 @@
 import { createHmac, randomBytes } from 'crypto';
 import * as jwt from 'jsonwebtoken';
-import { UserAuth, User, JwtAuth } from './types';
+import { UserAuth, UserDbSchema, JwtAuth } from './types';
 import { getUserByEmail } from '../db/queries';
 import { jtwHmacAlgorithm, jwtSecret } from '../config';
 
@@ -8,7 +8,7 @@ import { jtwHmacAlgorithm, jwtSecret } from '../config';
 export async function loginUser(
     email: string,
     password: string
-): Promise<User | null> {
+): Promise<UserDbSchema | null> {
     const user = await getUserByEmail(email);
 
     if (user === null) {
@@ -33,8 +33,8 @@ export function newAuthJwt(id: number, secret: string): string {
     return jwt.sign(payload, secret, { algorithm: jtwHmacAlgorithm });
 }
 
-export function createUserAuth(user: User): UserAuth {
-    const token = newAuthJwt(user.id, jwtSecret);
+export function createUserAuth(user: UserDbSchema): UserAuth {
+    const token = newAuthJwt(user.user_id, jwtSecret);
 
     const auth: UserAuth = {
         email: user.email,

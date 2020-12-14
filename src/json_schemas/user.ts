@@ -1,46 +1,84 @@
 import { JSONSchema7 } from 'json-schema';
 
-const UserProperties: JSONSchema7 = {
-    required: ['email', 'password'],
-    type: 'object',
-    properties: {
-        email: {
-            type: 'string',
-            format: 'email',
-            maxLength: 200,
-        },
-        password: {
-            type: 'string',
-        },
-    },
-    additionalProperties: false,
-};
-
 // Used for login requests
 export const UserLoginSchema: JSONSchema7 = {
     title: 'UserLogin',
     type: 'object',
     required: ['user'],
     properties: {
-        user: UserProperties,
+        user: {
+            required: ['email', 'password'],
+            type: 'object',
+            properties: {
+                email: {
+                    type: 'string',
+                    format: 'email',
+                },
+                password: {
+                    type: 'string',
+                },
+            },
+            additionalProperties: false,
+        },
     },
     additionalProperties: false,
 };
 
 // Used for registration requests
 export const UserRegisterSchema: JSONSchema7 = {
-    ...UserLoginSchema,
+    type: 'object',
+    required: ['user'],
     title: 'UserRegister',
     properties: {
         user: {
-            ...UserProperties,
-            required: [...(UserProperties?.required || []), 'username'],
+            required: ['email', 'password', 'username'],
+            type: 'object',
             properties: {
-                ...UserProperties.properties,
+                email: {
+                    type: 'string',
+                    format: 'email',
+                },
                 username: {
                     type: 'string',
                 },
+                password: {
+                    type: 'string',
+                },
             },
+            additionalProperties: false,
         },
+        additionalProperties: false,
+    },
+};
+
+// Used for update requests
+export const UserUpdateSchema: JSONSchema7 = {
+    type: 'object',
+    required: ['user'],
+    title: 'UserRegister',
+    properties: {
+        user: {
+            type: 'object',
+            properties: {
+                email: {
+                    type: 'string',
+                    format: 'email',
+                },
+                username: {
+                    type: 'string',
+                },
+                password: {
+                    type: 'string',
+                },
+                image: {
+                    type: 'string',
+                },
+                bio: {
+                    type: 'string',
+                },
+            },
+            additionalProperties: false,
+        },
+        additionalProperties: false,
     },
 };
