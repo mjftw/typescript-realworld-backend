@@ -8,18 +8,16 @@ import { jtwHmacAlgorithm, jwtSecret } from '../config';
 export async function loginUser(
     email: string,
     password: string
-): Promise<UserDbSchema | null> {
+): Promise<UserDbSchema | Error> {
     const user = await getUserByEmail(email);
 
-    if (user === null) {
-        // No user found with email
-        return null;
+    if (user instanceof Error) {
+        return Error('No user found with email');
     }
 
     const hashedPassword = hashPassword(password, user.password_salt);
     if (hashedPassword !== user.password_hash) {
-        //Incorrect Password
-        return null;
+        return Error('Incorrect password');
     }
 
     return user;

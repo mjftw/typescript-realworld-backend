@@ -5,59 +5,57 @@ import { UserDbSchema } from '../common/types';
 //      - Report some error in the response body
 //      - Ensure client is released from pool on database error
 
-export function getUserByEmail(email: string): Promise<UserDbSchema | null> {
-    return getUserBy('email', email);
+export function getUserByEmail(email: string): Promise<UserDbSchema | Error> {
+    return read<UserDbSchema>('users', { column: 'email', value: email });
 }
 
 export function getUserByUsername(
     username: string
-): Promise<UserDbSchema | null> {
-    return getUserBy('username', username);
+): Promise<UserDbSchema | Error> {
+    return read<UserDbSchema>('users', { column: 'username', value: username });
 }
 
-export function getUserById(id: number): Promise<UserDbSchema | null> {
-    return getUserBy('user_id', id);
+export function getUserById(id: number): Promise<UserDbSchema | Error> {
+    return read<UserDbSchema>('users', { column: 'user_id', value: id });
 }
 
-// Do not use user input as column, this is unsantised in query and could result in SQL injection!
-async function getUserBy(
-    column: string,
-    value: string | number
-): Promise<UserDbSchema | null> {
+export async function updateUser(
+    id: number,
+    fields: Partial<UserDbSchema>
+): Promise<UserDbSchema | Error> {
+    return update<UserDbSchema>(
+        'users',
+        { column: 'user_id', value: id },
+        fields
+    );
+}
+
+async function read<T extends Object>(
+    table: string,
+    uniqueKey: { column: string; value: unknown },
+    columns?: string[]
+): Promise<T | Error> {
+    const columnsString = columns ? columns.join(', ') : '*';
     const client = await pool.connect();
     const result = await client.query(
         `
-        SELECT
-            user_id,
-            email,
-            password_hash,
-            password_salt,
-            username,
-            bio,
-            image
-        FROM users
-        WHERE ${column} = $1
-        LIMIT 1;
+        SELECT ${columnsString}
+        FROM ${table}
+        WHERE ${uniqueKey.column} = $1;
     `,
-        [value]
+        [uniqueKey.value]
     );
     client.release();
 
-    // No matching users
-    if (result.rowCount == 0) {
-        return null;
+    if (result.rowCount < 1) {
+        return Error('No records were found');
     }
-    const dbUser = result.rows[0];
+    if (result.rowCount > 1) {
+        return Error('Multiple records were found');
+    }
 
-    return {
-        user_id: dbUser.user_id,
-        username: dbUser.username,
-        email: dbUser.email,
-        bio: dbUser.bio,
-        image: dbUser.bio,
-        password_hash: dbUser.password_hash,
-        password_salt: dbUser.password_salt,
-    };
+    const found: T = result.rows[0];
+    return found;
 }
 
 export async function addUser(
@@ -100,20 +98,9 @@ export async function addUser(
     };
 }
 
-export async function updateUser(
-    id: number,
-    fields: Partial<UserDbSchema>
-): Promise<UserDbSchema | Error> {
-    return update<UserDbSchema>(
-        'users',
-        { column: 'user_id', value: id },
-        fields
-    );
-}
-
 async function update<T extends Object>(
     table: string,
-    primaryKey: { column: string; value: unknown },
+    uniqueKey: { column: string; value: unknown },
     updateColumns: Partial<T>
 ): Promise<T | Error> {
     const columns = Object.keys(updateColumns);
@@ -121,7 +108,7 @@ async function update<T extends Object>(
         .map((column, idx) => `${column} = $${idx + 1}`)
         .join(', ');
     const idSub = `$${columns.length + 1}`;
-    const values = [...Object.values(updateColumns), primaryKey.value];
+    const values = [...Object.values(updateColumns), uniqueKey.value];
 
     //TODO: Add check that ONLY 1 row will be updated, abort if more
 
@@ -130,7 +117,7 @@ async function update<T extends Object>(
         `
         UPDATE ${table}
         SET ${setAssigns}
-        WHERE ${primaryKey.column} = ${idSub}
+        WHERE ${uniqueKey.column} = ${idSub}
         RETURNING *;
     `,
         values

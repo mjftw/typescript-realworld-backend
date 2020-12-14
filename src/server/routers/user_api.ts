@@ -44,12 +44,11 @@ router.post(
         // Valid user at this point
         const { user: reqUser }: UserRegisterReqBody = req.body;
 
-        // Valid user register data at this point
-        if ((await getUserByEmail(reqUser.email)) !== null) {
+        if (!((await getUserByEmail(reqUser.email)) instanceof Error)) {
             sendErrResponse(res, 403, 'Email address taken');
             return;
         }
-        if ((await getUserByUsername(reqUser.username)) !== null) {
+        if (!((await getUserByUsername(reqUser.username)) instanceof Error)) {
             sendErrResponse(res, 403, 'Username taken');
             return;
         }
@@ -87,18 +86,15 @@ router.post(
     async (req: Request, res: Response): Promise<void> => {
         // Valid user at this point
         const { user: reqUser }: UserLoginReqBody = req.body;
-        const maybeUser: UserDbSchema | null = await loginUser(
-            reqUser.email,
-            reqUser.password
-        );
-        if (maybeUser === null) {
+        const user = await loginUser(reqUser.email, reqUser.password);
+        if (user instanceof Error) {
             //NOTE: This could be invalid auth or nonexistent user
             sendErrResponse(res, 401, 'Incorrect email address or password');
             return;
         }
 
         const responseBody: UserResponseBody = {
-            user: createUserAuth(maybeUser),
+            user: createUserAuth(user),
         };
         res.send(responseBody);
     }
@@ -114,25 +110,25 @@ router.get(
             return;
         }
 
-        const maybeUser = await getUserById(userId);
-        if (!maybeUser) {
-            sendErrResponse(res, 404, 'No user matching JWT user auth');
+        const user = await getUserById(userId);
+        if (user instanceof Error) {
+            sendErrResponse(res, 404, 'User not found');
             return;
         }
 
-        const maybeToken = getJwtFromRequest(req);
-        if (!maybeToken) {
+        const token = getJwtFromRequest(req);
+        if (token === undefined) {
             sendErrResponse(res, 500, 'Unable to get token from request');
             return;
         }
 
         const responseBody: UserResponseBody = {
             user: {
-                email: maybeUser.email,
-                username: maybeUser.username,
-                bio: maybeUser.bio,
-                image: maybeUser.image,
-                token: maybeToken,
+                email: user.email,
+                username: user.username,
+                bio: user.bio,
+                image: user.image,
+                token: token,
             },
         };
         res.send(responseBody);
