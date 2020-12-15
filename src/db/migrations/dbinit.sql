@@ -15,7 +15,7 @@ CREATE UNIQUE INDEX email_idx ON users (email);
 CREATE UNIQUE INDEX id_idx ON users (user_id);
 
 CREATE TABLE articles (
-    article_id bigint GENERATED ALWAYS AS IDENTITY,
+    article_id bigserial PRIMARY KEY,
     slug varchar(100) NOT NULL,
     title varchar(200) NOT NULL,
     description varchar(500),
@@ -23,35 +23,31 @@ CREATE TABLE articles (
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
     author_id bigint NOT NULL,
-    PRIMARY KEY(article_id),
     FOREIGN KEY(author_id)
         REFERENCES users(user_id)
         ON DELETE CASCADE
 );
 
 CREATE TABLE comments (
-    comment_id bigint GENERATED ALWAYS AS IDENTITY,
+    comment_id bigserial PRIMARY KEY,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
     body text NOT NULL,
     author_id bigint NOT NULL,
-    PRIMARY KEY(comment_id),
     FOREIGN KEY(author_id)
         REFERENCES users(user_id)
         ON DELETE CASCADE
 );
 
 CREATE TABLE tags (
-    tag_id int GENERATED ALWAYS AS IDENTITY,
-    title varchar(50) NOT NULL UNIQUE,
-    PRIMARY KEY(tag_id)
+    tag_id bigserial PRIMARY KEY,
+    title varchar(50) NOT NULL UNIQUE
 );
 
 CREATE TABLE users_followed_users (
-    id bigint GENERATED ALWAYS AS IDENTITY,
-    follower_user_id bigint NOT NULL,
-    followed_user_id bigint NOT NULL,
-    PRIMARY KEY(id),
+    follower_user_id bigint,
+    followed_user_id bigint,
+    PRIMARY KEY(follower_user_id, followed_user_id),
     FOREIGN KEY(follower_user_id)
         REFERENCES users(user_id)
         ON DELETE CASCADE,
@@ -61,10 +57,9 @@ CREATE TABLE users_followed_users (
 );
 
 CREATE TABLE users_favorited_articles (
-    id bigint GENERATED ALWAYS AS IDENTITY,
-    user_id bigserial NOT NULL,
-    article_id bigserial NOT NULL,
-    PRIMARY KEY(id),
+    user_id bigint,
+    article_id bigint,
+    PRIMARY KEY(user_id, article_id),
     FOREIGN KEY(user_id)
         REFERENCES users(user_id)
         ON DELETE CASCADE,
@@ -74,9 +69,9 @@ CREATE TABLE users_favorited_articles (
 );
 
 CREATE TABLE articles_tags (
-    id bigint GENERATED ALWAYS AS IDENTITY,
-    article_id bigint NOT NULL,
-    tag_id int NOT NULL,
+    article_id bigint,
+    tag_id bigint,
+    PRIMARY KEY (article_id, tag_id),
     FOREIGN KEY(article_id)
         REFERENCES articles(article_id)
         ON DELETE CASCADE,
@@ -86,9 +81,9 @@ CREATE TABLE articles_tags (
 );
 
 CREATE TABLE articles_comments (
-    id bigint GENERATED ALWAYS AS IDENTITY,
-    article_id bigint NOT NULL,
-    comment_id bigint NOT NULL,
+    article_id bigint,
+    comment_id bigint,
+    PRIMARY KEY(article_id, comment_id),
     FOREIGN KEY(article_id)
         REFERENCES articles(article_id)
         ON DELETE CASCADE,
