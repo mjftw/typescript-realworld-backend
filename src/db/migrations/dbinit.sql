@@ -1,24 +1,22 @@
 -- TODO: Add column constraints to force data format. E.g. email addresses
 
 CREATE TABLE users (
-    user_id bigint GENERATED ALWAYS AS IDENTITY,
+    user_id bigserial PRIMARY KEY,
     password_hash varchar(200) NOT NULL,
     password_salt varchar(100) NOT NULL,
     email varchar(200) NOT NULL UNIQUE,
     username varchar(50) NOT NULL UNIQUE,
     bio text,
-    image text,
-    PRIMARY KEY(user_id)
+    image text
 );
 
 CREATE UNIQUE INDEX email_idx ON users (email);
-CREATE UNIQUE INDEX id_idx ON users (user_id);
 
 CREATE TABLE articles (
     article_id bigserial PRIMARY KEY,
     title varchar(200) NOT NULL,
     description varchar(500) NOT NULL,
-    slug varchar(100),
+    slug varchar(100) UNIQUE,
     body text NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
@@ -27,6 +25,8 @@ CREATE TABLE articles (
         REFERENCES users(user_id)
         ON DELETE CASCADE
 );
+
+CREATE UNIQUE INDEX slug_idx ON articles(slug);
 
 CREATE TABLE comments (
     comment_id bigserial PRIMARY KEY,

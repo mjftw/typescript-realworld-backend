@@ -119,6 +119,15 @@ export async function getArticlebyId(
     });
 }
 
+export async function getArticlebySlug(
+    slug: string
+): Promise<ArticleDbSchema | Error> {
+    return read<ArticleDbSchema>('articles', {
+        column: 'slug',
+        value: slug,
+    });
+}
+
 export async function getArticleTags(
     articleId: number
 ): Promise<string[] | undefined | Error> {

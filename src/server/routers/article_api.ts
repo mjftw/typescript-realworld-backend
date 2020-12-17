@@ -3,6 +3,7 @@ import { Validator } from 'express-json-validator-middleware';
 import { CreateArticleSchema } from '../../json_schemas/article';
 import {
     createArticle,
+    getArticlebySlug,
     getArticleFavoritesCount,
     getArticleTags,
     getUserById,
@@ -24,7 +25,7 @@ interface ArticleResponseBody {
         tagList?: string[];
         createdAt: string;
         updatedAt: string;
-        favorited: boolean;
+        favorited?: boolean;
         favoritesCount: number;
         author: {
             username: string;
@@ -78,15 +79,26 @@ router.post(
     }
 );
 
-async function getArticleResponseBody(
-    article: ArticleDbSchema,
-    userId: number
-): Promise<ArticleResponseBody | Error> {
-    const favorited = await isArticledFavorited(userId, article.article_id);
-    if (favorited instanceof Error) {
-        return favorited;
+router.get('/articles/:slug', async (req: Request, res: Response) => {
+    const article = await getArticlebySlug(req.params.slug);
+    if (article instanceof Error) {
+        sendErrResponse(res, 500, article);
+        return;
     }
 
+    const body = await getArticleResponseBody(article);
+    if (body instanceof Error) {
+        sendErrResponse(res, 500, body);
+        return;
+    }
+
+    res.send(body);
+});
+
+async function getArticleResponseBody(
+    article: ArticleDbSchema,
+    userId?: number
+): Promise<ArticleResponseBody | Error> {
     const favoritesCount = await getArticleFavoritesCount(article.article_id);
     if (favoritesCount instanceof Error) {
         return favoritesCount;
@@ -97,14 +109,23 @@ async function getArticleResponseBody(
         return tags;
     }
 
-    const author = await getUserById(userId);
+    const author = await getUserById(article.article_id);
     if (author instanceof Error) {
         return author;
     }
 
-    const followingAuthor = await isUserFollowing(userId, article.article_id);
-    if (followingAuthor instanceof Error) {
-        return followingAuthor;
+    let followingAuthor = undefined;
+    let favorited = undefined;
+    if (userId != undefined) {
+        followingAuthor = await isUserFollowing(userId, article.article_id);
+        if (followingAuthor instanceof Error) {
+            return followingAuthor;
+        }
+
+        favorited = await isArticledFavorited(userId, article.article_id);
+        if (favorited instanceof Error) {
+            return favorited;
+        }
     }
 
     return {
