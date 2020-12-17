@@ -3,6 +3,7 @@ import { Validator } from 'express-json-validator-middleware';
 import { CreateArticleSchema } from '../../json_schemas/article';
 import {
     createArticle,
+    getArticlebyId,
     getArticleFavoritesCount,
     getUserById,
     isArticledFavorited,
@@ -61,62 +62,69 @@ router.post(
             tagList: reqArticle.tagList,
         });
         if (article instanceof Error) {
-            sendErrResponse(res, 500, Error);
-            return;
-        }
-        console.log(JSON.stringify(article, undefined, 2));
-
-        const favoritesCount = await getArticleFavoritesCount(
-            article.article_id
-        );
-        if (favoritesCount instanceof Error) {
-            sendErrResponse(res, 500, Error);
+            sendErrResponse(res, 500, article);
             return;
         }
 
-        const favorited = await isArticledFavorited(userId, article.article_id);
-        if (favorited instanceof Error) {
-            sendErrResponse(res, 500, Error);
+        const body = await getArticleResponseBody(article.article_id, userId);
+        if (body instanceof Error) {
+            sendErrResponse(res, 500, body);
             return;
         }
-
-        const author = await getUserById(userId);
-        if (author instanceof Error) {
-            sendErrResponse(res, 500, Error);
-            return;
-        }
-
-        const followingAuthor = await isUserFollowing(
-            userId,
-            article.article_id
-        );
-        if (followingAuthor instanceof Error) {
-            sendErrResponse(res, 500, Error);
-            return;
-        }
-
-        const body: ArticleResponseBody = {
-            article: {
-                slug: article.slug,
-                title: article.title,
-                description: article.description,
-                body: article.body,
-                tagList: article.tag_list,
-                createdAt: article.created_at,
-                updatedAt: article.updated_at,
-                favorited: favorited,
-                favoritesCount: favoritesCount,
-                author: {
-                    username: author.username,
-                    bio: author.bio,
-                    image: author.bio,
-                    following: followingAuthor,
-                },
-            },
-        };
+        console.log(body);
 
         res.send(body);
     }
 );
+
+async function getArticleResponseBody(
+    articleId: number,
+    userId: number
+): Promise<ArticleResponseBody | Error> {
+    const article = await getArticlebyId(articleId);
+    if (article instanceof Error) {
+        return article;
+    }
+
+    const favorited = await isArticledFavorited(userId, article.article_id);
+    if (favorited instanceof Error) {
+        return favorited;
+    }
+
+    const author = await getUserById(userId);
+    if (author instanceof Error) {
+        return author;
+    }
+
+    const followingAuthor = await isUserFollowing(userId, article.article_id);
+    if (followingAuthor instanceof Error) {
+        return followingAuthor;
+    }
+
+    const favoritesCount = await getArticleFavoritesCount(article.article_id);
+    if (favoritesCount instanceof Error) {
+        return favoritesCount;
+    }
+
+    return {
+        article: {
+            slug: article.slug,
+            title: article.title,
+            description: article.description,
+            body: article.body,
+            tagList: article.tag_list,
+            createdAt: article.created_at,
+            updatedAt: article.updated_at,
+            favorited: favorited,
+            favoritesCount: favoritesCount,
+            author: {
+                username: author.username,
+                bio: author.bio,
+                image: author.bio,
+                following: followingAuthor,
+            },
+        },
+    };
+}
 
 export default router;
