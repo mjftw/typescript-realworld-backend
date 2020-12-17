@@ -16,9 +16,9 @@ CREATE UNIQUE INDEX id_idx ON users (user_id);
 
 CREATE TABLE articles (
     article_id bigserial PRIMARY KEY,
-    slug varchar(100) NOT NULL,
     title varchar(200) NOT NULL,
-    description varchar(500),
+    description varchar(500) NOT NULL,
+    slug varchar(100),
     body text NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
@@ -37,11 +37,6 @@ CREATE TABLE comments (
     FOREIGN KEY(author_id)
         REFERENCES users(user_id)
         ON DELETE CASCADE
-);
-
-CREATE TABLE tags (
-    tag_id bigserial PRIMARY KEY,
-    title varchar(50) NOT NULL UNIQUE
 );
 
 CREATE TABLE users_followed_users (
@@ -68,15 +63,12 @@ CREATE TABLE users_favorited_articles (
         ON DELETE CASCADE
 );
 
-CREATE TABLE articles_tags (
+CREATE TABLE article_tags (
     article_id bigint,
-    tag_id bigint,
-    PRIMARY KEY (article_id, tag_id),
+    tag varchar(50),
+    PRIMARY KEY (article_id, tag),
     FOREIGN KEY(article_id)
         REFERENCES articles(article_id)
-        ON DELETE CASCADE,
-    FOREIGN KEY(tag_id)
-        REFERENCES tags(tag_id)
         ON DELETE CASCADE
 );
 

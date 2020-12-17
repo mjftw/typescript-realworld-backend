@@ -1,5 +1,5 @@
 import pool from './dbconfig';
-import { UserDbSchema } from './schemaTypes';
+import { ArticleDbSchema, UserDbSchema } from './schemaTypes';
 
 //TODO: Need add database error handling throughout:
 //      - Report some error in the response body
@@ -44,24 +44,87 @@ export async function createUser(
     });
 }
 
+export async function createArticle(
+    title: string,
+    description: string,
+    body: string,
+    authorId: number,
+    tagList?: string[]
+): Promise<ArticleDbSchema | Error> {
+    const client = await pool.connect();
+    return client
+        .query('START TRANSACTION;')
+        .then(() =>
+            client.query(
+                `
+                INSERT INTO articles(
+                    title,
+                    description,
+                    body,
+                    author_id,
+                    created_at,
+                    updated_at
+                )
+                VALUES (
+                    $1,
+                    $2,
+                    $3,
+                    $4,
+                    CURRENT_TIMESTAMP,
+                    CURRENT_TIMESTAMP
+                );
+            `,
+                [title, description, body, authorId]
+            )
+        )
+        .then(() =>
+            tagList?.length
+                ? client.query(`
+
+                INSERT INTO article_tags(article_id, tag)
+                VALUES ${tagList
+                    .map(
+                        (tag) =>
+                            `(currval(pg_get_serial_sequence('articles', 'article_id')), '${tag}')`
+                    )
+                    .join(', ')};
+                `)
+                : undefined
+        )
+        .then(() => client.query('COMMIT;'))
+        .then(() =>
+            client.query(`
+                SELECT *
+                FROM articles
+                WHERE article_id = currval(pg_get_serial_sequence('articles', 'article_id'));
+            `)
+        )
+        .then((result) => {
+            const newArticle: ArticleDbSchema = {
+                ...result.rows[0],
+                tagList,
+            };
+            return newArticle;
+        })
+        .catch((err) => err)
+        .finally(() => client.release());
+}
+
 async function create<T extends Object>(
     table: string,
     columns: Partial<T>
 ): Promise<T | Error> {
-    const columnsString = Object.keys(columns).join(', ');
-    const valuesString = Object.keys(columns)
-        .map((_, idx) => `$${idx + 1}`)
-        .join(', ');
+    const { columnsStr, valuesStr, values } = getInsertList(columns);
 
     const client = await pool.connect();
     return client
         .query(
             `
-            INSERT INTO ${table}(${columnsString})
-            VALUES (${valuesString})
+            INSERT INTO ${table}(${columnsStr})
+            VALUES (${valuesStr})
             RETURNING *;
             `,
-            Object.values(columns)
+            values
         )
         .then((result) => {
             if (result.rowCount < 1) {
@@ -80,12 +143,12 @@ async function read<T extends Object>(
     uniqueKey: { column: string; value: unknown },
     columns?: string[]
 ): Promise<T | Error> {
-    const columnsString = columns ? columns.join(', ') : '*';
+    const columnsStr = columns ? columns.join(', ') : '*';
     const client = await pool.connect();
     return client
         .query(
             `
-            SELECT ${columnsString}
+            SELECT ${columnsStr}
             FROM ${table}
             WHERE ${uniqueKey.column} = $1;
             `,
@@ -144,3 +207,15 @@ async function update<T extends Object>(
 }
 
 //TODO: Make generic database function: delete
+
+function getInsertList<T extends Object>(
+    obj: Partial<T>
+): { columnsStr: string; valuesStr: string; values: unknown[] } {
+    return {
+        columnsStr: Object.keys(obj).join(', '),
+        valuesStr: Object.keys(obj)
+            .map((_, idx) => `$${idx + 1}`)
+            .join(', '),
+        values: Object.values(obj),
+    };
+}

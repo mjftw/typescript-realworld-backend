@@ -10,7 +10,7 @@ export type UserDbSchema = {
     password_salt: string;
 };
 
-export interface Article {
+export interface ArticleDbSchema {
     article_id: number;
     slug: string;
     title: string;
