@@ -16,12 +16,10 @@ export interface ArticleDbSchema {
     title: string;
     description: string;
     body: string;
-    tagList: [Tag];
-    createdAt: Date;
-    updatedAt: Date;
-    favorited: boolean;
-    favoritesCount: number;
-    author: UserProfile;
+    tag_list: string[];
+    created_at: string;
+    updated_at: string;
+    author_id: number;
 }
 
 export interface Comment {
@@ -30,9 +28,4 @@ export interface Comment {
     updatedAt: Date;
     body: string;
     author: UserProfile;
-}
-
-export interface Tag {
-    id: number;
-    title: string;
 }

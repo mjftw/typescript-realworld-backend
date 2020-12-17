@@ -44,13 +44,19 @@ export async function createUser(
     });
 }
 
-export async function createArticle(
-    title: string,
-    description: string,
-    body: string,
-    authorId: number,
-    tagList?: string[]
-): Promise<ArticleDbSchema | Error> {
+export async function createArticle({
+    title,
+    description,
+    body,
+    authorId,
+    tagList,
+}: {
+    title: string;
+    description: string;
+    body: string;
+    authorId: number;
+    tagList?: string[];
+}): Promise<ArticleDbSchema | Error> {
     const client = await pool.connect();
     return client
         .query('START TRANSACTION;')
@@ -94,18 +100,117 @@ export async function createArticle(
         .then(() => client.query('COMMIT;'))
         .then(() =>
             client.query(`
-                SELECT *
-                FROM articles
-                WHERE article_id = currval(pg_get_serial_sequence('articles', 'article_id'));
+                SELECT currval(pg_get_serial_sequence('articles', 'article_id')) AS article_id;
             `)
         )
-        .then((result) => {
-            const newArticle: ArticleDbSchema = {
-                ...result.rows[0],
-                tagList,
-            };
-            return newArticle;
+        .then(({ rows: [{ article_id }] }) => {
+            return getArticlebyId(article_id);
         })
+        .catch((err) => err)
+        .finally(() => client.release());
+}
+
+export async function getArticlebyId(
+    articleId: number
+): Promise<ArticleDbSchema | Error> {
+    const article = await read<ArticleDbSchema>('articles', {
+        column: 'article_id',
+        value: articleId,
+    });
+    if (article instanceof Error) {
+        return article;
+    }
+
+    const tags = await getArticleTags(articleId);
+    if (tags instanceof Error || tags === undefined) {
+        return article;
+    }
+
+    return {
+        ...article,
+        tag_list: tags,
+    };
+}
+
+export async function getArticleTags(
+    articleId: number
+): Promise<string[] | undefined | Error> {
+    const client = await pool.connect();
+    return client
+        .query(
+            `
+            SELECT tag
+            FROM article_tags
+            WHERE article_id = $1;
+        `,
+            [articleId]
+        )
+        .then((result) => {
+            if (result.rowCount < 1) {
+                return undefined;
+            }
+            return result.rows.map(({ tag }) => tag);
+        })
+        .catch((err) => err)
+        .finally(() => client.release());
+}
+
+export async function getArticleFavoritesCount(
+    articleId: number
+): Promise<number | Error> {
+    const client = await pool.connect();
+    return client
+        .query(
+            `
+            SELECT count(*)
+            FROM users_favorited_articles
+            WHERE article_id = $1;
+            `,
+            [articleId]
+        )
+        .then(({ rows: [{ count }] }) => parseInt(count))
+        .catch((err) => err)
+        .finally(() => client.release());
+}
+
+export async function isArticledFavorited(
+    articleId: number,
+    userId: number
+): Promise<boolean | Error> {
+    const client = await pool.connect();
+    return client
+        .query(
+            `
+            SELECT exists(
+                SELECT 1
+                FROM users_favorited_articles
+                WHERE article_id = $1 AND user_id = $2
+            );
+        `,
+            [articleId, userId]
+        )
+        .then(({ rows: [{ exists }] }) => exists)
+        .catch((err) => err)
+        .finally(() => client.release());
+}
+
+export async function isUserFollowing(
+    followerUserId: number,
+    followedUserId: number
+): Promise<boolean | Error> {
+    const client = await pool.connect();
+    return client
+        .query(
+            `
+            SELECT exists(
+                SELECT 1
+                FROM users_followed_users
+                WHERE follower_user_id = $1 AND followed_user_id = $2
+            );
+        `,
+            [followerUserId, followedUserId]
+        )
+        .then(({ rows: [{ exists }] }) => exists)
         .catch((err) => err)
         .finally(() => client.release());
 }
