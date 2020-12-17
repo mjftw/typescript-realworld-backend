@@ -113,23 +113,10 @@ export async function createArticle({
 export async function getArticlebyId(
     articleId: number
 ): Promise<ArticleDbSchema | Error> {
-    const article = await read<ArticleDbSchema>('articles', {
+    return read<ArticleDbSchema>('articles', {
         column: 'article_id',
         value: articleId,
     });
-    if (article instanceof Error) {
-        return article;
-    }
-
-    const tags = await getArticleTags(articleId);
-    if (tags instanceof Error || tags === undefined) {
-        return article;
-    }
-
-    return {
-        ...article,
-        tag_list: tags,
-    };
 }
 
 export async function getArticleTags(

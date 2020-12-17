@@ -3,13 +3,14 @@ import { Validator } from 'express-json-validator-middleware';
 import { CreateArticleSchema } from '../../json_schemas/article';
 import {
     createArticle,
-    getArticlebyId,
     getArticleFavoritesCount,
+    getArticleTags,
     getUserById,
     isArticledFavorited,
     isUserFollowing,
 } from '../../db/queries';
 import { getCurrentUserId, sendErrResponse } from '../utils';
+import { ArticleDbSchema } from '../../db/schemaTypes';
 
 const router = Router();
 const validator = new Validator({ allErrors: true });
@@ -66,7 +67,7 @@ router.post(
             return;
         }
 
-        const body = await getArticleResponseBody(article.article_id, userId);
+        const body = await getArticleResponseBody(article, userId);
         if (body instanceof Error) {
             sendErrResponse(res, 500, body);
             return;
@@ -78,17 +79,22 @@ router.post(
 );
 
 async function getArticleResponseBody(
-    articleId: number,
+    article: ArticleDbSchema,
     userId: number
 ): Promise<ArticleResponseBody | Error> {
-    const article = await getArticlebyId(articleId);
-    if (article instanceof Error) {
-        return article;
-    }
-
     const favorited = await isArticledFavorited(userId, article.article_id);
     if (favorited instanceof Error) {
         return favorited;
+    }
+
+    const favoritesCount = await getArticleFavoritesCount(article.article_id);
+    if (favoritesCount instanceof Error) {
+        return favoritesCount;
+    }
+
+    const tags = await getArticleTags(article.article_id);
+    if (tags instanceof Error) {
+        return tags;
     }
 
     const author = await getUserById(userId);
@@ -101,18 +107,13 @@ async function getArticleResponseBody(
         return followingAuthor;
     }
 
-    const favoritesCount = await getArticleFavoritesCount(article.article_id);
-    if (favoritesCount instanceof Error) {
-        return favoritesCount;
-    }
-
     return {
         article: {
             slug: article.slug,
             title: article.title,
             description: article.description,
             body: article.body,
-            tagList: article.tag_list,
+            tagList: tags,
             createdAt: article.created_at,
             updatedAt: article.updated_at,
             favorited: favorited,

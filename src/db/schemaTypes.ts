@@ -16,7 +16,6 @@ export interface ArticleDbSchema {
     title: string;
     description: string;
     body: string;
-    tag_list: string[];
     created_at: string;
     updated_at: string;
     author_id: number;
