@@ -109,7 +109,7 @@ async function getArticleResponseBody(
         return tags;
     }
 
-    const author = await getUserById(article.article_id);
+    const author = await getUserById(article.author_id);
     if (author instanceof Error) {
         return author;
     }
@@ -117,7 +117,7 @@ async function getArticleResponseBody(
     let followingAuthor = undefined;
     let favorited = undefined;
     if (userId != undefined) {
-        followingAuthor = await isUserFollowing(userId, article.article_id);
+        followingAuthor = await isUserFollowing(userId, article.author_id);
         if (followingAuthor instanceof Error) {
             return followingAuthor;
         }

@@ -38,7 +38,7 @@ class Server {
                 { methods: ['GET'], url: '/' },
                 { methods: ['POST'], url: '/api/users/login' },
                 { methods: ['POST'], url: '/api/users' },
-                { methods: ['GET'], url: '/api/articles/:slug' },
+                { methods: ['GET'], url: /api\/articles\/.+\//g },
             ],
         };
 
