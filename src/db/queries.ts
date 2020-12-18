@@ -1,3 +1,4 @@
+import { createSlug } from '../common/slugs';
 import pool from './dbconfig';
 import { ArticleDbSchema, UserDbSchema } from './schemaTypes';
 
@@ -57,6 +58,9 @@ export async function createArticle({
     authorId: number;
     tagList?: string[];
 }): Promise<ArticleDbSchema | Error> {
+    const slug = await findUniqueSlug(title, 'articles', 'slug');
+    console.log('SLUUUUG: ', slug);
+
     const client = await pool.connect();
     return client
         .query('START TRANSACTION;')
@@ -64,6 +68,7 @@ export async function createArticle({
             client.query(
                 `
                 INSERT INTO articles(
+                    slug,
                     title,
                     description,
                     body,
@@ -76,11 +81,12 @@ export async function createArticle({
                     $2,
                     $3,
                     $4,
+                    $5,
                     CURRENT_TIMESTAMP,
                     CURRENT_TIMESTAMP
                 );
             `,
-                [title, description, body, authorId]
+                [slug, title, description, body, authorId]
             )
         )
         .then(() =>
@@ -260,13 +266,16 @@ async function read<T extends Object>(
                 return Error('No records were found');
             }
             if (result.rowCount > 1) {
+                console.log('Umm wat? 2');
                 return Error('Multiple records were found');
             }
 
             const found: T = result.rows[0];
             return found;
         })
-        .catch((error) => error)
+        .catch((error) => {
+            return error;
+        })
         .finally(() => client.release());
 }
 
@@ -319,4 +328,46 @@ function getInsertList<T extends Object>(
             .join(', '),
         values: Object.values(obj),
     };
+}
+
+async function findUniqueSlug(
+    message: string,
+    checkTable: string,
+    checkColumn: string
+): Promise<string> {
+    const initialSlug = createSlug(message);
+
+    const client = await pool.connect();
+    return client
+        .query(
+            `
+            SELECT ${checkColumn} AS slug
+            FROM ${checkTable}
+            WHERE ${checkColumn} LIKE '${initialSlug}%'
+            `
+        )
+        .then((result) => {
+            if (result.rowCount < 1) {
+                return initialSlug;
+            }
+            const slugs = result.rows.map(({ slug }) => slug);
+
+            if (!slugs.includes(initialSlug)) {
+                return initialSlug;
+            }
+
+            let randomTailSlug;
+            // Keep trying random numbers from 0 to 1 billion as end of slug
+            // until we find a unique one. This could technically loop forever,
+            // but unlikely even if we have approx half billion identical slugs.
+            do {
+                randomTailSlug = `${initialSlug}-${Math.floor(
+                    Math.random() * 1000000000
+                )}`;
+            } while (slugs.includes(randomTailSlug));
+
+            return randomTailSlug;
+        })
+        .catch((err) => err)
+        .finally(() => client.release());
 }
