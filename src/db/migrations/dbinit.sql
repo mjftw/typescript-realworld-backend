@@ -16,7 +16,7 @@ CREATE TABLE articles (
     article_id bigserial PRIMARY KEY,
     title varchar(200) NOT NULL,
     description varchar(500) NOT NULL,
-    slug varchar(100) UNIQUE,
+    slug varchar(200) UNIQUE,
     body text NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
