@@ -80,13 +80,15 @@ router.post(
 );
 
 router.get('/articles/:slug', async (req: Request, res: Response) => {
+    const userId = getCurrentUserId(req);
+
     const article = await getArticlebySlug(req.params.slug);
     if (article instanceof Error) {
         sendErrResponse(res, 404, 'Article not found');
         return;
     }
 
-    const body = await getArticleResponseBody(article);
+    const body = await getArticleResponseBody(article, userId);
     if (body instanceof Error) {
         sendErrResponse(res, 500, body);
         return;

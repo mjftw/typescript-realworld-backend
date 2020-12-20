@@ -42,15 +42,17 @@ class Server {
             ],
         };
 
-        // Verify user auth JWT and a user property to requests
+        const jwtOptions = {
+            secret: jwtSecret,
+            algorithms: [jtwHmacAlgorithm],
+            requestProperty: 'auth',
+            //TODO: issuer: <server_hostname> //Add when server can set hostname to ensure server signed JWT
+            getToken: getJwtFromRequest,
+        };
+
+        // Verify user auth JWT and only continue if valid
         this.app.use(
-            jwt({
-                secret: jwtSecret,
-                algorithms: [jtwHmacAlgorithm],
-                requestProperty: 'auth',
-                //TODO: issuer: <server_hostname> //Add when server can set hostname to ensure server signed JWT
-                getToken: getJwtFromRequest,
-            }).unless(skipAuthOn),
+            jwt(jwtOptions).unless(skipAuthOn),
             (err: Error, _req: Request, res: Response, next: NextFunction) => {
                 if (err.name === 'UnauthorizedError') {
                     sendErrResponse(res, 401, `Unauthorized: ${err.message}`);
@@ -58,6 +60,18 @@ class Server {
                 }
                 next();
             }
+        );
+
+        // Parse user Id from JWT and add to request "auth" property even for
+        // routes that don't require auth (specified in previous unless,
+        // skipAuthOn). This is a bit hacky and inefficient as we check the
+        // JWT twice, but okay for now as needed to work around limitation with
+        // express-jwt use of unless.
+        this.app.use(
+            jwt({
+                ...jwtOptions,
+                credentialsRequired: false,
+            })
         );
     }
 
