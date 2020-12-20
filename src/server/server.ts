@@ -64,14 +64,13 @@ class Server {
 
         // Parse user Id from JWT and add to request "auth" property even for
         // routes that don't require auth (specified in previous unless,
-        // skipAuthOn). This is a bit hacky and inefficient as we check the
-        // JWT twice, but okay for now as needed to work around limitation with
-        // express-jwt use of unless.
+        // skipAuthOn). This is skipped if auth has already been parsed to
+        // prevent unneeded operations.
         this.app.use(
             jwt({
                 ...jwtOptions,
                 credentialsRequired: false,
-            })
+            }).unless((req) => req?.auth !== undefined)
         );
     }
 
