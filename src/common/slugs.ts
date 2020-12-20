@@ -14,6 +14,7 @@ export function createSlug(msg: string): string {
         );
 
     slug = slug.toLowerCase();
+    slug = slug.replace(/(^-*|-*$)/g, '');
 
     return slug;
 }
