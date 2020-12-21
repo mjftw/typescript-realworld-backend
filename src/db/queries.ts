@@ -217,6 +217,52 @@ export async function isUserFollowing(
         .finally(() => client.release());
 }
 
+export async function followUser(
+    followerUserId: number,
+    followedUserId: number
+): Promise<undefined | Error> {
+    const following = await isUserFollowing(followerUserId, followedUserId);
+    if (following) {
+        return undefined;
+    }
+
+    const client = await pool.connect();
+    return client
+        .query(
+            `
+            INSERT INTO users_followed_users
+            VALUES ($1, $2);
+        `,
+            [followerUserId, followedUserId]
+        )
+        .then(() => undefined)
+        .catch((err) => err)
+        .finally(() => client.release());
+}
+
+export async function unfollowUser(
+    followerUserId: number,
+    followedUserId: number
+): Promise<undefined | Error> {
+    const following = await isUserFollowing(followerUserId, followedUserId);
+    if (!following) {
+        return undefined;
+    }
+
+    const client = await pool.connect();
+    return client
+        .query(
+            `
+            DELETE FROM users_followed_users
+            WHERE follower_user_id = $1 AND followed_user_id = $2;
+        `,
+            [followerUserId, followedUserId]
+        )
+        .then(() => undefined)
+        .catch((err) => err)
+        .finally(() => client.release());
+}
+
 async function create<T extends Object>(
     table: string,
     columns: Partial<T>

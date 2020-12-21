@@ -15,9 +15,12 @@ import { UserAuth } from '../../common/types';
 import { saltLength } from '../../config';
 import {
     createUser,
+    followUser,
+    unfollowUser,
     getUserByEmail,
     getUserById,
     getUserByUsername,
+    isUserFollowing,
     updateUser,
 } from '../../db/queries';
 import { getCurrentUserId, getJwtFromRequest, sendErrResponse } from '../utils';
@@ -197,5 +200,90 @@ router.put(
         res.send(body);
     }
 );
+
+interface ProfileResponseBody {
+    profile: {
+        username: string;
+        bio?: string;
+        image?: string;
+        following?: boolean;
+    };
+}
+
+router.get('/profiles/:username', async (req: Request, res: Response) => {
+    const username = req.params.username;
+    const user = await getUserByUsername(username);
+    if (user instanceof Error) {
+        sendErrResponse(res, 404, 'Profile not found');
+        return;
+    }
+
+    const currentUserId = getCurrentUserId(req);
+
+    const following =
+        currentUserId !== undefined
+            ? await isUserFollowing(currentUserId, user.user_id)
+            : undefined;
+
+    if (following instanceof Error) {
+        sendErrResponse(res, 500, Error);
+        return;
+    }
+
+    const profile: ProfileResponseBody = {
+        profile: {
+            username: user.username,
+            bio: user.bio,
+            image: user.image,
+            following,
+        },
+    };
+
+    res.send(profile);
+});
+
+//TODO: Test me
+router.post('/profiles/:username/follow', async (req: Request, res: Response) =>
+    followUserHandler(req, res, true)
+);
+
+router.delete(
+    '/profiles/:username/follow',
+    async (req: Request, res: Response) => followUserHandler(req, res, false)
+);
+
+async function followUserHandler(req: Request, res: Response, follow: boolean) {
+    const currentUserId = getCurrentUserId(req);
+    if (currentUserId === undefined) {
+        sendErrResponse(res, 500, '');
+        return;
+    }
+
+    const username = req.params.username;
+    const user = await getUserByUsername(username);
+    if (user instanceof Error) {
+        sendErrResponse(res, 404, 'Profile not found');
+        return;
+    }
+
+    const ret = follow
+        ? await followUser(currentUserId, user.user_id)
+        : await unfollowUser(currentUserId, user.user_id);
+    if (ret instanceof Error) {
+        sendErrResponse(res, 500, ret);
+        return;
+    }
+
+    const profile: ProfileResponseBody = {
+        profile: {
+            username: user.username,
+            bio: user.bio,
+            image: user.image,
+            following: follow,
+        },
+    };
+
+    res.send(profile);
+}
 
 export default router;
